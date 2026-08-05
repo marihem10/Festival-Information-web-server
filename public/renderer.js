@@ -807,7 +807,7 @@ document.addEventListener('click', () => {
 function getCalMetrics() {
     const isMobile = window.innerWidth <= 768;
     return isMobile
-        ? { maxLanes: 2, barHeight: 13, barGap: 2, topOffset: 30 }
+        ? { maxLanes: 2, barHeight: 13, barGap: 2, topOffset: 36 }
         : { maxLanes: 3, barHeight: 18, barGap: 3, topOffset: 38 };
 }
 

@@ -1169,7 +1169,7 @@ header h1 {
         font-size: 12px;
     }
     .calendar-cell {
-        min-height: 76px;
+        min-height: 82px;
         padding: 6px;
         border-radius: 8px;
     }
