@@ -454,9 +454,9 @@ header h1 {
 }
 
 .detail-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    align-items: start;
     gap: 12px;
     font-size: 15px;
     color: #333;
@@ -465,16 +465,11 @@ header h1 {
 }
 
 .detail-row .label {
-    flex-shrink: 0;
     width: 22px;
 }
 
-/* 아이콘(●) 바로 뒤에 오는 텍스트 - min-width:0이 없으면 텍스트가 길 때
-   flexbox가 이 칸 전체를 아이콘 옆이 아니라 다음 줄로 통째로 넘겨버려서,
-   "● " 만 혼자 있고 그 아래 줄에 텍스트가 시작되는 것처럼 보이는 문제가 생김 */
-.detail-row .label + span {
+.detail-row > span:not(.label) {
     min-width: 0;
-    flex: 1 1 auto;
 }
 
 .detail-map-btn {
@@ -1109,10 +1104,6 @@ header h1 {
     .card-thumb {
         height: 190px !important;
         width: calc(100% + 32px);
-        /* contain이면 세로로 긴 포스터 이미지가 작게 뜨고 옆에 빈 여백이 남아서 어색했음
-           → cover로 꽉 채우고, 보통 제목 글자가 위쪽에 있는 포스터가 많아서 위쪽 기준으로 자름 */
-        object-fit: cover;
-        object-position: center top;
     }
 
     /* --- 카드 디테일 다듬기 --- */
