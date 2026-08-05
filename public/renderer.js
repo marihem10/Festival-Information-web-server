@@ -7,7 +7,10 @@
 const tabs = document.querySelectorAll('.menu li');
 const views = document.querySelectorAll('.view-section');
 
-function showView(id) {
+// popstate(뒤로가기)로 인한 화면 전환일 땐 history.pushState를 다시 하면 안 되므로 구분하는 플래그
+let isHandlingPopState = false;
+
+function showView(id, detailKey = null) {
     views.forEach(v => v.style.display = 'none');
     // 'block'으로 강제하면 view-home/view-bookmarks에 필요한 display:flex(CSS)를 덮어써버려서
     // 화면 전환 후 레이아웃이 깨짐 - 인라인 스타일을 아예 지워서 CSS가 알아서 결정하게 함
@@ -21,7 +24,39 @@ function showView(id) {
     //   놔뒀다가 다시 들어가면 그 위치 그대로 열리는 문제가 있어서 같이 리셋함
     target.scrollTop = 0;
     window.scrollTo(0, 0);
+
+    // 📱 화면 전환마다 브라우저 히스토리에 기록을 남김 - 이게 없으면 폰에서 뒤로가기를
+    // 눌렀을 때 "이 사이트 안에서 갈 곳이 없다"고 판단해서 앱 자체가 꺼져버림
+    if (!isHandlingPopState) {
+        const state = { view: id };
+        if (id === 'view-detail' && detailKey) state.festKey = detailKey;
+        history.pushState(state, '', '#' + id);
+    }
 }
+
+// 페이지가 처음 열렸을 때를 "홈" 기준점으로 히스토리에 남겨둠 (새 기록을 추가하는 게 아니라
+// 지금 있는 기록을 덮어씀 - 그래야 홈 화면에서 뒤로가기 눌렀을 때 정상적으로 앱이 종료됨)
+history.replaceState({ view: 'view-home' }, '', '#view-home');
+
+// 폰/브라우저의 "뒤로가기"를 앱 안에서 처리 - 이전 화면으로 돌아가고, 그 화면에 맞게 다시 그려줌
+window.addEventListener('popstate', (e) => {
+    isHandlingPopState = true;
+    const state = e.state || { view: 'view-home' };
+
+    if (state.view === 'view-detail' && state.festKey) {
+        showFestivalDetailByKey(state.festKey);
+    } else {
+        const view = state.view || 'view-home';
+        closeMobileMenu();
+        tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === view));
+        showView(view);
+        if (view === 'view-home') renderPage();
+        if (view === 'view-bookmarks') renderBookmarkPage();
+        if (view === 'view-calendar') renderCalendar();
+    }
+
+    isHandlingPopState = false;
+});
 
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -48,11 +83,10 @@ document.querySelectorAll('.logo').forEach(el => {
     });
 });
 document.getElementById('detail-back-btn').addEventListener('click', () => {
-    showView(lastViewBeforeDetail);
-    tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === lastViewBeforeDetail));
-    if (lastViewBeforeDetail === 'view-home') renderPage();
-    if (lastViewBeforeDetail === 'view-bookmarks') renderBookmarkPage();
-    if (lastViewBeforeDetail === 'view-calendar') renderCalendar();
+    // 여기서 바로 showView를 부르면 히스토리에 새 기록이 쌓여서(뒤로가기가 아니라 전진처럼 취급됨)
+    // 폰 뒤로가기 버튼이랑 동작이 어긋나게 됨 - history.back()으로 통일해서 popstate 핸들러가
+    // 알아서 이전 화면을 복원하게 함 (= 폰 뒤로가기 눌렀을 때랑 똑같이 동작)
+    history.back();
 });
 
 document.getElementById('sidebar-toggle').addEventListener('click', () => {
@@ -611,7 +645,7 @@ function openDetailForFest(fest) {
     showingOriginalLang = false;
     renderDetailContent();
     tabs.forEach(t => t.classList.remove('active'));
-    showView('view-detail');
+    showView('view-detail', fest.key);
 }
 
 function showFestivalDetail(idx) {
