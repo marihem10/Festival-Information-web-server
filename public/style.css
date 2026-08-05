@@ -35,6 +35,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    cursor: pointer;
 }
 
 .logo-icon {
@@ -466,6 +467,14 @@ header h1 {
 .detail-row .label {
     flex-shrink: 0;
     width: 22px;
+}
+
+/* 아이콘(●) 바로 뒤에 오는 텍스트 - min-width:0이 없으면 텍스트가 길 때
+   flexbox가 이 칸 전체를 아이콘 옆이 아니라 다음 줄로 통째로 넘겨버려서,
+   "● " 만 혼자 있고 그 아래 줄에 텍스트가 시작되는 것처럼 보이는 문제가 생김 */
+.detail-row .label + span {
+    min-width: 0;
+    flex: 1 1 auto;
 }
 
 .detail-map-btn {
@@ -1100,6 +1109,31 @@ header h1 {
     .card-thumb {
         height: 190px !important;
         width: calc(100% + 32px);
+        /* contain이면 세로로 긴 포스터 이미지가 작게 뜨고 옆에 빈 여백이 남아서 어색했음
+           → cover로 꽉 채우고, 보통 제목 글자가 위쪽에 있는 포스터가 많아서 위쪽 기준으로 자름 */
+        object-fit: cover;
+        object-position: center top;
+    }
+
+    /* --- 카드 디테일 다듬기 --- */
+    .card {
+        box-shadow: 0 6px 20px rgba(31, 38, 135, 0.10);
+    }
+    .card:hover {
+        /* 터치 화면은 탭한 뒤에도 :hover 상태가 계속 남아있는 경우가 있어서 무효화 */
+        transform: none;
+        background: rgba(255, 255, 255, 0.45);
+    }
+    .card:active {
+        /* 데스크톱의 마우스오버 대신, 눌렀을 때 살짝 눌리는 피드백 */
+        transform: scale(0.98);
+        background: rgba(255, 255, 255, 0.65);
+    }
+    .status-badge {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+    .bookmark-btn {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
     }
 
     .search-input-wrap {
@@ -1144,7 +1178,7 @@ header h1 {
         font-size: 12px;
     }
     .calendar-cell {
-        min-height: 64px;
+        min-height: 70px;
         padding: 6px;
         border-radius: 8px;
     }

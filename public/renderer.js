@@ -11,7 +11,16 @@ function showView(id) {
     views.forEach(v => v.style.display = 'none');
     // 'block'으로 강제하면 view-home/view-bookmarks에 필요한 display:flex(CSS)를 덮어써버려서
     // 화면 전환 후 레이아웃이 깨짐 - 인라인 스타일을 아예 지워서 CSS가 알아서 결정하게 함
-    document.getElementById(id).style.removeProperty('display');
+    const target = document.getElementById(id);
+    target.style.removeProperty('display');
+    // 화면 전환할 때마다 스크롤을 맨 위로 초기화
+    // - 모바일: 페이지 전체가 스크롤되는 구조라 window 스크롤을 리셋 안 하면
+    //   홈에서 아래로 스크롤한 상태로 상세페이지에 들어갔을 때 그 스크롤 위치 그대로 유지돼서
+    //   포스터(맨 위)가 아니라 화면 중간부터 보이는 문제가 생김
+    // - 데스크톱: 각 view-section이 자기만의 스크롤을 갖고 있어서, 이전에 그 화면을 스크롤해둔 채
+    //   놔뒀다가 다시 들어가면 그 위치 그대로 열리는 문제가 있어서 같이 리셋함
+    target.scrollTop = 0;
+    window.scrollTo(0, 0);
 }
 
 tabs.forEach(tab => {
@@ -28,6 +37,16 @@ tabs.forEach(tab => {
 });
 
 let lastViewBeforeDetail = 'view-home';
+
+// --- 🏠 로고 누르면 홈으로 ---
+document.querySelectorAll('.logo').forEach(el => {
+    el.addEventListener('click', () => {
+        closeMobileMenu();
+        tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === 'view-home'));
+        showView('view-home');
+        renderPage();
+    });
+});
 document.getElementById('detail-back-btn').addEventListener('click', () => {
     showView(lastViewBeforeDetail);
     tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === lastViewBeforeDetail));
@@ -748,7 +767,16 @@ document.addEventListener('click', () => {
     document.querySelector('.calendar-info-tooltip')?.classList.remove('show');
 });
 
-const CAL_MAX_LANES = 3;
+// 화면 크기에 따라 캘린더 막대 배치 값을 다르게 씀
+// - 모바일은 칸(cell) 자체가 작아서 3줄을 다 넣으면 다음 주 칸까지 침범해서 날짜 숫자가 가려짐
+//   → 모바일은 최대 2줄까지만, 막대 높이/여백도 더 작게
+function getCalMetrics() {
+    const isMobile = window.innerWidth <= 768;
+    return isMobile
+        ? { maxLanes: 2, barHeight: 13, barGap: 2, topOffset: 24 }
+        : { maxLanes: 3, barHeight: 18, barGap: 3, topOffset: 38 };
+}
+
 let calendarBookmarkOnly = false;
 
 document.getElementById('cal-filter-all').addEventListener('click', () => {
@@ -763,10 +791,6 @@ document.getElementById('cal-filter-bookmark').addEventListener('click', () => {
     document.getElementById('cal-filter-all').classList.remove('active');
     renderCalendar();
 });
-
-const CAL_BAR_HEIGHT = 18;
-const CAL_BAR_GAP = 3;
-const CAL_TOP_OFFSET = 38; // 셀 안쪽 여백(10px) + 날짜 숫자 높이/여백까지 포함해서 안 겹치게
 
 function renderCalendar() {
     const year = currentDate.getFullYear();
@@ -802,6 +826,7 @@ function renderCalendar() {
 }
 
 function renderEventOverlayBars(year, month, lastDay) {
+    const { maxLanes: CAL_MAX_LANES, barHeight: CAL_BAR_HEIGHT, barGap: CAL_BAR_GAP, topOffset: CAL_TOP_OFFSET } = getCalMetrics();
     const calendarBody = document.getElementById('calendar-body');
     calendarBody.style.position = 'relative';
 
