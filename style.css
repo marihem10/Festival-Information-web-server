@@ -1,0 +1,1183 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+:root {
+    --primary-blue: #007AFF;
+    --text-main: #1d1d1f;
+    --text-muted: #515154;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    /* 바다 느낌의 시원하고 은은한 그라데이션 배경 */
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-main);
+    height: 100vh;
+}
+
+#sidebar {
+    width: 240px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 30px 20px;
+    z-index: 10;
+}
+
+.logo {
+    color: #0056b3;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 50px;
+    padding-left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.menu {
+    list-style: none;
+    padding: 0;
+}
+
+.menu li {
+    padding: 14px 20px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.menu li:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.menu li.active {
+    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--primary-blue);
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+#content {
+    flex: 1;
+    padding: 30px 40px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100vh;
+}
+
+.view-section {
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding-right: 18px;
+}
+
+#view-home.view-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#view-bookmarks.view-section {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #111;
+}
+
+#festival-grid-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 18px;
+}
+
+#festival-grid,
+#bookmark-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    min-height: 100%;
+    align-content: start;
+    align-items: start;
+}
+
+/* 유리 질감 카드 디자인 */
+.card {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(15px);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.card-thumb {
+    width: calc(100% + 32px);
+    /* renderer.js가 실제 남는 공간을 측정해서 이 변수를 정확히 계산해줌 (검색바/태그필터/
+       페이지네이션 높이까지 다 뺀 값이라 스크롤 없이 딱 맞음). 계산 전 기본값은 150px. */
+    height: var(--card-thumb-height, 150px);
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 18px 18px 0 0;
+    margin: -16px -16px 12px -16px;
+    display: block;
+}
+.card-thumb-placeholder {
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #515154;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.card h3 {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    /* 제목이 1줄이든 2줄이든 항상 2줄 만큼 공간을 고정으로 차지하게 해서,
+       카드 높이가 제목 길이에 따라 들쭉날쭉해지지 않게 함 */
+    height: 2.7em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tag {
+    display: inline-block;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--primary-blue);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+/* 캘린더 전용 CSS (지난번에 빼먹은 부분!) */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(15px);
+    padding: 15px 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.calendar-header button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--primary-blue);
+    cursor: pointer;
+    font-weight: bold;
+    padding: 5px 15px;
+}
+
+.calendar-header button:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+}
+
+.calendar-filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.calendar-info-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--primary-blue);
+    font-size: 13px;
+    font-weight: 800;
+    cursor: help;
+    border: 1.5px solid var(--primary-blue);
+}
+
+.calendar-info-tooltip {
+    display: none;
+    position: absolute;
+    top: 30px;
+    right: 0;
+    width: 260px;
+    background: rgba(20, 20, 25, 0.94);
+    color: #ffffff;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: left;
+    z-index: 30;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    cursor: default;
+}
+.calendar-info-tooltip strong {
+    font-size: 13px;
+}
+.calendar-info-icon:hover .calendar-info-tooltip {
+    display: block;
+}
+
+.cal-filter-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.cal-filter-btn:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+.cal-filter-btn.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+#cal-filter-bookmark.active {
+    background: #FFB300;
+    border-color: #FFB300;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.calendar-day-name {
+    text-align: center;
+    font-weight: bold;
+    color: var(--text-muted);
+    padding: 10px 0;
+}
+
+.calendar-cell {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    min-height: 128px;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s;
+    overflow: hidden;
+}
+
+.calendar-cell:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.calendar-cell.empty {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.calendar-date {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.calendar-cell.today .calendar-date {
+    background-color: var(--primary-blue);
+    color: white;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    line-height: 24px;
+    border-radius: 50%;
+}
+
+.calendar-cell.selected {
+    box-shadow: 0 0 0 2px var(--primary-blue) inset;
+    background: rgba(0, 122, 255, 0.08);
+}
+
+/*  축제 상세정보 화면 (모달 대신 별도 화면으로 전환) */
+.card {
+    cursor: pointer;
+    position: relative;
+}
+
+.status-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    z-index: 1;
+}
+.status-badge.ongoing { background: #ff9500; }
+.status-badge.upcoming { background: #34c759; }
+.status-badge.ended { background: rgba(60,60,67,0.7); }
+
+#detail-back-btn {
+    background: rgba(255, 255, 255, 0.6);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+#detail-back-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.detail-layout {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.detail-layout-image {
+    flex: 0 0 42%;
+    max-width: 42%;
+    position: sticky;
+    top: 20px;
+}
+
+.detail-card {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 800px) {
+    .detail-layout {
+        flex-direction: column;
+    }
+    .detail-layout-image {
+        flex: none;
+        max-width: 100%;
+        width: 100%;
+        position: static;
+    }
+}
+
+.detail-image {
+    width: 100%;
+    max-height: 450px;
+    object-fit: contain;
+    background: rgba(0,0,0,0.04);
+    border-radius: 20px;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.detail-image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: rgba(0,0,0,0.05);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #515154;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.detail-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 25px 30px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.detail-card h2 {
+    margin: 0 0 15px 0;
+    font-size: 26px;
+    color: #111;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.detail-row .label {
+    flex-shrink: 0;
+    width: 22px;
+}
+
+.detail-map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--primary-blue);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.detail-map-btn:hover {
+    background: rgba(0, 122, 255, 0.2);
+}
+
+.detail-summary {
+    font-size: 14px;
+    color: #515154;
+    line-height: 1.7;
+    margin: 18px 0;
+    white-space: pre-line;
+}
+
+.detail-link {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--primary-blue);
+    color: white;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.copy-link-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(255,255,255,0.6);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.copy-link-btn:hover {
+    background: rgba(255,255,255,0.9);
+    color: var(--primary-blue);
+}
+.copy-link-btn.copied {
+    color: #34c759;
+    border-color: #34c759;
+    font-weight: 700;
+}
+
+/* --- 사이드바 접기/펴기 --- */
+.sidebar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-left: 15px;
+}
+
+.sidebar-top .logo {
+    margin: 0;
+    padding-left: 0;
+}
+
+#sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 6px 10px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#sidebar-toggle:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+#sidebar {
+    transition: width 0.2s ease;
+}
+
+#sidebar.collapsed {
+    width: 70px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+#sidebar.collapsed .sidebar-top {
+    justify-content: center;
+    padding-left: 0;
+}
+
+#sidebar.collapsed .logo-text,
+#sidebar.collapsed .menu-text {
+    display: none;
+}
+
+#sidebar.collapsed .menu li {
+    display: flex;
+    justify-content: center;
+    padding: 14px 0;
+}
+
+.menu li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.menu-icon {
+    display: flex;
+    align-items: center;
+}
+
+/* --- 검색바 --- */
+.search-bar-wrap {
+    flex: 0 0 auto;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+#pagination-controls {
+    flex: 0 0 auto;
+}
+
+#bookmark-pagination-controls {
+    flex: 0 0 auto;
+}
+
+.search-input-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    display: flex;
+    z-index: 1;
+}
+
+#festival-search-input {
+    width: 100%;
+    padding: 10px 40px 10px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(15px);
+    font-size: 13px;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: var(--text-main);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    box-sizing: border-box;
+}
+#festival-search-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--primary-blue);
+}
+#festival-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+/* --- 탭필터 --- */
+.tag-filter-wrap {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.tag-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.15s ease;
+    user-select: none;
+}
+.tag-chip:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+.tag-chip.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+/* --- 북마크 --- */
+.bookmark-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(6px);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
+    color: #b0b0b5;
+    padding: 0;
+}
+.bookmark-btn:hover {
+    background: rgba(255, 255, 255, 0.95);
+}
+.bookmark-btn.active {
+    color: #FFB300;
+}
+.bookmark-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+}
+.bookmark-btn.active svg {
+    fill: currentColor;
+}
+
+.detail-bookmark-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.8);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    box-sizing: border-box;
+}
+.detail-bookmark-btn.active {
+    color: #FFB300;
+    background: rgba(255, 179, 0, 0.1);
+    border-color: rgba(255, 179, 0, 0.4);
+}
+.detail-bookmark-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+}
+.detail-bookmark-btn.active svg {
+    fill: currentColor;
+}
+
+.detail-orig-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: rgba(0, 122, 255, 0.08);
+    border: 1px solid rgba(0, 122, 255, 0.25);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    box-sizing: border-box;
+}
+.detail-orig-toggle-btn:hover {
+    background: rgba(0, 122, 255, 0.15);
+}
+
+#bookmark-grid-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 18px;
+}
+
+/* --- 캘린더 일정 --- */
+.calendar-cell {
+    position: relative;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+}
+.calendar-cell.has-event {
+    cursor: pointer;
+}
+.calendar-cell.has-event:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+.calendar-event-bar {
+    font-size: 10px;
+    font-weight: 700;
+    height: 18px;
+    line-height: 18px;
+    box-sizing: border-box;
+    padding: 0 6px;
+    background: linear-gradient(135deg, #5B7FB5, #34517F);
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 0;
+    box-shadow: 0 1px 4px rgba(52, 81, 127, 0.4);
+}
+.calendar-event-bar.bar-start {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+.calendar-event-bar.bar-end {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+.calendar-event-bar.bookmarked {
+    background: linear-gradient(135deg, #E3A94A, #C9860B);
+    color: #3d2400;
+    font-weight: 800;
+    box-shadow: 0 1px 5px rgba(201, 134, 11, 0.5);
+}
+.calendar-event-more {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+.calendar-event-more.has-bookmark {
+    color: #b56a00;
+    font-weight: 700;
+}
+
+#calendar-day-detail {
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(15px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+}
+#calendar-day-detail:empty {
+    display: none;
+}
+.day-detail-item {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    cursor: pointer;
+}
+.day-detail-item:last-child {
+    border-bottom: none;
+}
+.day-detail-item:hover {
+    color: var(--primary-blue);
+}
+
+/* --- 로딩 화면 --- */
+.loading-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid rgba(0, 122, 255, 0.15);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 16px 0;
+}
+
+.loading-progress-track {
+    width: 260px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.loading-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), #5AC8FA);
+    border-radius: 10px;
+    transition: width 0.25s ease;
+}
+
+.loading-subtext {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 10px 0 0 0;
+}
+
+/* --- 스플래시 화면 --- */
+#splash-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    transition: opacity 0.5s ease;
+}
+
+#splash-overlay.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.splash-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: 26px;
+    object-fit: cover;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+}
+
+.splash-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0056b3;
+    letter-spacing: 0.5px;
+}
+
+.splash-sub {
+    font-size: 12px;
+    color: #515154;
+    margin-top: -8px;
+}
+
+.splash-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.splash-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #0056b3;
+    opacity: 0.3;
+    animation: splashPulse 1.1s ease-in-out infinite;
+}
+.splash-dots span:nth-child(2) { animation-delay: 0.15s; }
+.splash-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes splashPulse {
+    0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+    40% { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================
+   📱 모바일(PWA) 대응 - 768px 이하일 때만 적용
+   데스크톱 스타일은 위에 그대로 두고, 여기서 필요한 부분만 덮어씀
+   ============================================================ */
+
+/* 모바일 상단바 - 데스크톱에선 항상 숨김 */
+#mobile-topbar {
+    display: none;
+}
+
+#sidebar-backdrop {
+    display: none;
+}
+
+@media (max-width: 768px) {
+
+    body {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* --- 상단바 (로고 + 햄버거 버튼) --- */
+    #mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    #mobile-topbar .logo {
+        margin: 0;
+        padding-left: 0;
+        font-size: 18px;
+    }
+    #mobile-menu-toggle {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.55);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+    #mobile-menu-toggle:active {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* --- 사이드바를 화면 왼쪽에서 슬라이드되는 오버레이 서랍으로 --- */
+    #sidebar,
+    #sidebar.collapsed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 78vw;
+        max-width: 300px;
+        padding: 30px 20px;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 50;
+        box-shadow: 8px 0 30px rgba(0, 0, 0, 0.15);
+    }
+    #sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    /* 모바일 서랍에서는 데스크톱의 "접힌 아이콘만" 상태를 무시하고 항상 글자까지 다 보여줌 */
+    #sidebar.collapsed .logo-text,
+    #sidebar.collapsed .menu-text {
+        display: inline;
+    }
+    #sidebar.collapsed .sidebar-top {
+        justify-content: space-between;
+        padding-left: 15px;
+    }
+    #sidebar.collapsed .menu li {
+        justify-content: flex-start;
+        padding: 14px 20px;
+    }
+    /* 데스크톱 전용 접기 버튼은 모바일에선 필요 없음(햄버거가 그 역할을 대신함) */
+    #sidebar-toggle {
+        display: none;
+    }
+
+    #sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: 40;
+    }
+    #sidebar-backdrop.show {
+        display: block;
+    }
+
+    /* --- 메인 콘텐츠: 고정 높이/숨김스크롤 대신 자연스러운 페이지 스크롤로 --- */
+    #content {
+        padding: 16px;
+        height: auto;
+        min-height: auto;
+        overflow: visible;
+    }
+    .view-section {
+        height: auto;
+        overflow: visible;
+        padding-right: 0;
+    }
+    #view-home.view-section,
+    #view-bookmarks.view-section {
+        overflow: visible;
+        min-height: auto;
+    }
+    #festival-grid-wrap,
+    #bookmark-grid-wrap {
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    header h1 {
+        font-size: 24px;
+        margin-bottom: 18px;
+    }
+
+    /* --- 카드 그리드: 3열 → 1열 --- */
+    #festival-grid,
+    #bookmark-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    /* 모바일은 세로 스크롤이 자연스러워서, 데스크톱처럼 "화면에 딱 맞추는" 계산 대신 고정 높이 사용 */
+    .card-thumb {
+        height: 190px !important;
+        width: calc(100% + 32px);
+    }
+
+    .search-input-wrap {
+        max-width: 100%;
+    }
+
+    /* --- 터치 영역 확대 --- */
+    .menu li {
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+    .tag-chip {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    .cal-filter-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    .bookmark-btn {
+        width: 34px;
+        height: 34px;
+    }
+    #pagination-controls button,
+    #bookmark-pagination-controls button {
+        padding: 10px 18px !important;
+        font-size: 14px !important;
+    }
+
+    /* --- 캘린더: 7칸 유지하되 셀/글씨 크기를 폰 화면에 맞게 축소 --- */
+    .calendar-header {
+        padding: 10px 14px;
+    }
+    #calendar-month-year {
+        font-size: 16px !important;
+    }
+    .calendar-grid {
+        gap: 4px;
+    }
+    .calendar-day-name {
+        padding: 6px 0;
+        font-size: 12px;
+    }
+    .calendar-cell {
+        min-height: 64px;
+        padding: 6px;
+        border-radius: 8px;
+    }
+    .calendar-date {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+    .calendar-event-bar {
+        font-size: 8px;
+        height: 13px;
+        line-height: 13px;
+        padding: 0 3px;
+    }
+    .calendar-event-more {
+        font-size: 8px;
+    }
+    .calendar-filter-toggle {
+        flex-wrap: wrap;
+    }
+
+    /* --- 마우스오버 툴팁 → 탭 방식 --- */
+    .calendar-info-tooltip {
+        width: 220px;
+    }
+    .calendar-info-tooltip.show {
+        display: block;
+    }
+
+    /* --- 상세 화면은 이미 800px 기준 반응형이 잡혀있어서 자연스럽게 세로로 쌓임 --- */
+    .detail-card {
+        padding: 20px 18px;
+    }
+    .detail-card h2 {
+        font-size: 21px;
+    }
+}
