@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>釜山フェスナビ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="splash-overlay">
+        <img src="logo.png" class="splash-logo" alt="">
+        <div class="splash-title">釜山フェスナビ</div>
+        <div class="splash-sub">Busan Navi</div>
+        <div class="splash-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <nav id="sidebar">
+        <div class="sidebar-top">
+            <h2 class="logo"><span class="logo-text">釜山フェスナビ</span></h2>
+            <button id="sidebar-toggle" title="メニューを折りたたむ">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+            </button>
+        </div>
+        <ul class="menu">
+            <li class="active" data-target="view-home">
+                <span class="menu-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></span>
+                <span class="menu-text">ホーム</span>
+            </li>
+            <li data-target="view-calendar">
+                <span class="menu-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg></span>
+                <span class="menu-text">カレンダー</span>
+            </li>
+            <li data-target="view-bookmarks">
+                <span class="menu-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg></span>
+                <span class="menu-text">ブックマーク</span>
+            </li>
+        </ul>
+    </nav>
+
+    <main id="content">
+        <div id="view-home" class="view-section active">
+            <div class="search-bar-wrap">
+                <div class="search-input-wrap">
+                    <input type="text" id="festival-search-input" placeholder="イベント名・場所で検索..." />
+                    <span class="search-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                </div>
+            </div>
+            <div id="tag-filter-wrap" class="tag-filter-wrap"></div>
+            <div id="festival-grid-wrap">
+                <div id="festival-grid"></div>
+            </div>
+            <div id="pagination-controls"></div>
+        </div>
+
+        <div id="view-calendar" class="view-section" style="display: none;">
+            
+            <div class="calendar-header">
+                <button id="btn-prev-month">&lt;</button>
+                <h2 id="calendar-month-year" style="margin:0; font-size:20px;">2026年 7月</h2>
+                <button id="btn-next-month">&gt;</button>
+            </div>
+
+            <div class="calendar-filter-toggle">
+                <button id="cal-filter-all" class="cal-filter-btn active">すべて</button>
+                <button id="cal-filter-bookmark" class="cal-filter-btn">★ ブックマークのみ</button>
+                <span class="calendar-info-icon">
+                    ?
+                    <span class="calendar-info-tooltip">
+                        <strong>カレンダーの見方</strong><br>
+                        ★マーク = ブックマークしたイベントです。<br>
+                        「+N」= まだ表示できていないイベントが N件あります。数字をクリックすると全部見られます。
+                    </span>
+                </span>
+            </div>
+            
+            <div class="calendar-grid" id="calendar-days-header">
+                <div class="calendar-day-name" style="color:#e74c3c;">日</div>
+                <div class="calendar-day-name">月</div>
+                <div class="calendar-day-name">火</div>
+                <div class="calendar-day-name">水</div>
+                <div class="calendar-day-name">木</div>
+                <div class="calendar-day-name">金</div>
+                <div class="calendar-day-name" style="color:#3BA4E6;">土</div>
+            </div>
+            
+            <div class="calendar-grid" id="calendar-body">
+                </div>
+
+            <div id="calendar-day-detail"></div>
+        </div>
+
+        <div id="view-bookmarks" class="view-section" style="display: none;">
+            <header><h1>ブックマーク</h1></header>
+            <div id="bookmark-tag-filter-wrap" class="tag-filter-wrap"></div>
+            <div id="bookmark-grid-wrap">
+                <div id="bookmark-grid"></div>
+            </div>
+            <div id="bookmark-pagination-controls"></div>
+        </div>
+
+        <div id="view-detail" class="view-section" style="display: none;">
+            <button id="detail-back-btn">&lt; 戻る</button>
+            <div id="detail-content"></div>
+        </div>
+    </main>
+
+    <script src="web-api.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
