@@ -709,6 +709,11 @@ header h1 {
     color: white;
     border-color: #34c759;
 }
+/* 데스크톱은 넓어서 전체 글자(開催中/開催予定)를 그대로 보여줌 -
+   짧은 글자(동그라미 아이콘용)는 모바일에서만 @media 안에서 켜짐 */
+.status-label-short {
+    display: none;
+}
 
 /* --- 북마크 --- */
 .bookmark-btn {
@@ -1188,26 +1193,68 @@ header h1 {
         font-size: 11px;
     }
     /* 데스크톱은 화면이 넓어서 카테고리랑 開催中/開催予定이 한 줄에 다 들어가는데,
-       모바일은 폭이 좁아서 그대로 두면 줄바꿈되어 두 줄로 나뉘어 버림(디자인이 붕 뜸).
-       그래서 줄바꿈 대신 한 줄로 고정하고 옆으로 스크롤하게 해서, 데스크톱과 같은
-       순서(카테고리 → 상태버튼)를 유지하면서도 줄바꿈 없이 깔끔하게 보이게 함 */
+       모바일은 폭이 좁아서 다 들어가지 않음. 줄 전체를 스크롤시키면 開催予定이
+       화면 밖으로 밀려서 "잘린 것"처럼 보이고 스크롤 가능한지도 티가 안 나서 헷갈림.
+       그래서 카테고리 칩(개수가 늘어날 수 있는 쪽)만 스크롤되게 하고,
+       開催中/開催予定 버튼은 폭을 줄이지 않고(flex-shrink:0) 항상 오른쪽 끝에 고정해서
+       절대 화면 밖으로 잘리지 않게 함 */
     .filter-row {
         flex-wrap: nowrap;
-        overflow-x: auto;
         padding-right: 0;
+    }
+    #tag-filter-wrap,
+    #bookmark-tag-filter-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-x: auto;
+        flex-wrap: nowrap;
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
-    .filter-row::-webkit-scrollbar {
+    #tag-filter-wrap::-webkit-scrollbar,
+    #bookmark-tag-filter-wrap::-webkit-scrollbar {
         display: none;
     }
-    .filter-row .tag-filter-wrap {
-        flex-wrap: nowrap;
-        flex-shrink: 0;
-    }
-    .filter-row .tag-chip {
+    #tag-filter-wrap .tag-chip,
+    #bookmark-tag-filter-wrap .tag-chip {
         white-space: nowrap;
         flex-shrink: 0;
+    }
+    #status-filter-wrap,
+    #bookmark-status-filter-wrap {
+        flex: 0 0 auto;
+    }
+    /* 開催中/開催予定을 글자 그대로 두면 자리를 너무 많이 차지해서,
+       모바일에서는 작은 색상 동그라미 아이콘(글자 한 자)으로 축소함.
+       비활성 상태는 테두리만 색깔, 눌러서 활성화되면 꽉 채운 색으로 바뀜
+       (카드에 뜨는 開催中/あとN日 뱃지 색이랑 동일한 색 규칙) */
+    .status-label-full {
+        display: none;
+    }
+    .status-label-short {
+        display: inline;
+    }
+    .status-filter-ongoing,
+    .status-filter-upcoming {
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+        border-width: 1.5px;
+        background: rgba(255, 255, 255, 0.55);
+    }
+    .status-filter-ongoing {
+        color: #ff9500;
+        border-color: #ff9500;
+    }
+    .status-filter-upcoming {
+        color: #34c759;
+        border-color: #34c759;
     }
 
     .cal-filter-btn {

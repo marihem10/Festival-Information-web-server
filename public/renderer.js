@@ -343,12 +343,14 @@ function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
 function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
     const container = document.getElementById(containerId);
     const options = [
-        { label: '開催中', val: 'ongoing', cls: 'status-filter-ongoing' },
-        { label: '開催予定', val: 'upcoming', cls: 'status-filter-upcoming' }
+        { label: '開催中', short: '中', val: 'ongoing', cls: 'status-filter-ongoing' },
+        { label: '開催予定', short: '予', val: 'upcoming', cls: 'status-filter-upcoming' }
     ];
     container.innerHTML = options.map(o => {
         const active = activeFilter === o.val;
-        return `<span class="tag-chip ${o.cls} ${active ? 'active' : ''}" data-status="${o.val}">${o.label}</span>`;
+        // 데스크톱은 전체 글자(label)를 보여주고, 모바일은 CSS로 짧은 글자(short)만
+        // 동그라미 아이콘 안에 보여줌 - title 속성이 있어서 길게 눌러도 무슨 뜻인지 알 수 있음
+        return `<span class="tag-chip ${o.cls} ${active ? 'active' : ''}" data-status="${o.val}" title="${o.label}"><span class="status-label-full">${o.label}</span><span class="status-label-short">${o.short}</span></span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
         chip.addEventListener('click', () => {
