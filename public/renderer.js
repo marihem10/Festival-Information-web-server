@@ -337,14 +337,38 @@ function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
     });
 }
 
+// --- 🟠🟢 상태(開催中/開催予定) 토글 버튼 ---
+// 태그 필터랑 다르게, 이건 "단일 선택 목록"이 아니라 각 버튼이 독립적인 온/오프 토글임.
+// 開催中 누르면 진행중인 것만, 다시 누르면 해제(전체 보기)로 돌아감. 開催予定도 마찬가지.
+function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
+    const container = document.getElementById(containerId);
+    const options = [
+        { label: '開催中', val: 'ongoing', cls: 'status-filter-ongoing' },
+        { label: '開催予定', val: 'upcoming', cls: 'status-filter-upcoming' }
+    ];
+    container.innerHTML = options.map(o => {
+        const active = activeFilter === o.val;
+        return `<span class="tag-chip ${o.cls} ${active ? 'active' : ''}" data-status="${o.val}">${o.label}</span>`;
+    }).join('');
+    container.querySelectorAll('.tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const val = chip.getAttribute('data-status');
+            // 이미 켜져있는 버튼을 다시 누르면 꺼짐(null=전체보기), 아니면 그 상태로 켜짐
+            onToggle(activeFilter === val ? null : val);
+        });
+    });
+}
+
 let allFestivalsCache = [];
 let currentPage = 1;
 let searchQuery = '';
 let homeTagFilter = null;
+let homeStatusFilter = null; // null(전체) / 'ongoing' / 'upcoming'
 const PAGE_SIZE = 6;
 
 function getFilteredList() {
     let list = allFestivalsCache;
+    if (homeStatusFilter) list = list.filter(f => f.status.key === homeStatusFilter);
     if (homeTagFilter) list = list.filter(f => f.category === homeTagFilter);
     if (searchQuery) {
         const q = normalizeForSearch(searchQuery);
@@ -474,6 +498,11 @@ function renderPage() {
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
     renderFestivals(pageItems, true, filtered.length, 'festival-grid', '該当するイベントが見つかりませんでした。');
+    renderStatusFilterButtons('status-filter-wrap', homeStatusFilter, (status) => {
+        homeStatusFilter = status;
+        currentPage = 1;
+        renderPage();
+    });
     renderTagFilterChips('tag-filter-wrap', allFestivalsCache, homeTagFilter, (cat) => {
         homeTagFilter = cat;
         currentPage = 1;
@@ -485,6 +514,7 @@ function renderPage() {
 // --- ⭐ ブックマーク画面 ---
 let bookmarkPage = 1;
 let bookmarkTagFilter = null;
+let bookmarkStatusFilter = null;
 
 function getBookmarkedList() {
     return allFestivalsCache.filter(f => bookmarkedKeys.has(f.key));
@@ -492,6 +522,7 @@ function getBookmarkedList() {
 
 function getFilteredBookmarkList() {
     let list = getBookmarkedList();
+    if (bookmarkStatusFilter) list = list.filter(f => f.status.key === bookmarkStatusFilter);
     if (bookmarkTagFilter) list = list.filter(f => f.category === bookmarkTagFilter);
     return list;
 }
@@ -504,6 +535,11 @@ function renderBookmarkPage() {
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
     renderFestivals(pageItems, true, filtered.length, 'bookmark-grid', 'まだブックマークしたイベントがありません。');
+    renderStatusFilterButtons('bookmark-status-filter-wrap', bookmarkStatusFilter, (status) => {
+        bookmarkStatusFilter = status;
+        bookmarkPage = 1;
+        renderBookmarkPage();
+    });
     renderTagFilterChips('bookmark-tag-filter-wrap', getBookmarkedList(), bookmarkTagFilter, (cat) => {
         bookmarkTagFilter = cat;
         bookmarkPage = 1;

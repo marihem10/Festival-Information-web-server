@@ -663,6 +663,20 @@ header h1 {
     margin-bottom: 14px;
 }
 
+/* 카테고리 필터랑 開催中/開催予定 버튼을 한 줄에 - 왼쪽엔 카테고리, 오른쪽 끝엔 상태버튼 */
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-right: 18px;
+}
+.filter-row .tag-filter-wrap {
+    margin-bottom: 0;
+}
+
 .tag-chip {
     padding: 6px 14px;
     border-radius: 20px;
@@ -682,6 +696,18 @@ header h1 {
     background: var(--primary-blue);
     color: white;
     border-color: var(--primary-blue);
+}
+
+/* 開催中/開催予定 토글 버튼 - 카드에 뜨는 .status-badge 색이랑 통일 */
+.status-filter-ongoing.active {
+    background: #ff9500;
+    color: white;
+    border-color: #ff9500;
+}
+.status-filter-upcoming.active {
+    background: #34c759;
+    color: white;
+    border-color: #34c759;
 }
 
 /* --- 북마크 --- */

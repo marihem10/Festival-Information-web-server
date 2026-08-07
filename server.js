@@ -213,7 +213,12 @@ async function fetchHubEvents() {
     pageNo += 1;
     if (pageNo > 10) break;
   }
-  return filterExcludedHubItems(allItems);
+  const filtered = filterExcludedHubItems(allItems);
+  // 🔎 진단용: 좌표 필드가 실제로 어떤 이름으로 오는지 확인 (경로안내 기능 준비용)
+  if (filtered[0]) {
+    console.log('[server] hub 원본 항목 샘플(좌표 필드 확인용):', JSON.stringify(filtered[0], null, 2).slice(0, 1500));
+  }
+  return filtered;
 }
 
 function httpsGetJson(url) {
