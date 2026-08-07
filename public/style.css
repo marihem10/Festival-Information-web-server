@@ -1232,7 +1232,9 @@ header h1 {
         display: none;
     }
     .status-label-short {
-        display: inline;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .status-filter-ongoing,
     .status-filter-upcoming {

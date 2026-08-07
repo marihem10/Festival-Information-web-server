@@ -343,8 +343,8 @@ function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
 function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
     const container = document.getElementById(containerId);
     const options = [
-        { label: '開催中', short: '中', val: 'ongoing', cls: 'status-filter-ongoing' },
-        { label: '開催予定', short: '予', val: 'upcoming', cls: 'status-filter-upcoming' }
+        { label: '開催中', short: '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>', val: 'ongoing', cls: 'status-filter-ongoing' },
+        { label: '開催予定', short: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>', val: 'upcoming', cls: 'status-filter-upcoming' }
     ];
     container.innerHTML = options.map(o => {
         const active = activeFilter === o.val;
