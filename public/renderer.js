@@ -206,7 +206,7 @@ function normalizeHubItem(item) {
         title: item.title || '',
         summary: item.outl || '',
         address: item.eventPlace || item.addr1 || '',
-        region: REGION_JA[deriveRegion(item.orig_eventPlace || item.orig_addr1 || '')],
+        region: REGION_JA[deriveRegion(`${item.orig_title || ''} ${item.orig_eventPlace || item.orig_addr1 || ''}`)],
         // 👉 대분류(行事/祭り/パフォーマンス)는 category, 세부분류(전통역사축제 등)는
         // subCategory로 따로 보관 - 대분류 먼저 고르고 그 안에서 세부분류를 고르는
         // 2단계 필터로 씀 (한 번에 세부분류 20개를 다 보여주면 너무 많아서)
@@ -258,7 +258,7 @@ function normalizeSimpleItem(item) {
         title: item.title || '',
         summary: item.summary || '',
         address: item.place || item.address || '',
-        region: REGION_JA[deriveRegion(item.orig_place || '')],
+        region: REGION_JA[deriveRegion(`${item.orig_title || ''} ${item.orig_place || ''}`)],
         category: item.category || '',
         subCategory: '', // 직접추가 항목은 세부분류 개념이 없음 - 대분류에서만 뜸
         image: item.image || '',
