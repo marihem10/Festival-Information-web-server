@@ -861,6 +861,26 @@ if (homeGridWrapEl) cardHeightObserver.observe(homeGridWrapEl);
 if (bookmarkGridWrapEl) cardHeightObserver.observe(bookmarkGridWrapEl);
 
 let currentDetailFest = null;
+let detailMiniMap = null;
+
+// 상세페이지의 작은 지도 - 이 축제 하나의 위치만 보여줌 (좌표 없으면 아예 안 만듦)
+function initDetailMap(fest) {
+    const lat = parseFloat(fest.lat);
+    const lng = parseFloat(fest.lng);
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+    const container = document.getElementById('detail-mini-map');
+    if (!container) return;
+
+    maptilersdk.config.apiKey = MAPTILER_API_KEY;
+    detailMiniMap = new maptilersdk.Map({
+        container: 'detail-mini-map',
+        style: maptilersdk.MapStyle.STREETS,
+        center: [lng, lat],
+        zoom: 14,
+        language: maptilersdk.Language.JAPANESE
+    });
+    new maptilersdk.Marker({ color: '#007AFF' }).setLngLat([lng, lat]).addTo(detailMiniMap);
+}
 let showingOriginalLang = false;
 
 function openDetailForFest(fest) {
@@ -869,11 +889,20 @@ function openDetailForFest(fest) {
     const current = [...views].find(v => v.style.display !== 'none' && v.id !== 'view-detail');
     if (current) lastViewBeforeDetail = current.id;
 
+    // 이전 상세페이지에 미니 지도가 있었으면, 그 컨테이너가 사라지기 전에 먼저 정리
+    if (detailMiniMap) {
+        detailMiniMap.remove();
+        detailMiniMap = null;
+    }
+
     currentDetailFest = fest;
     showingOriginalLang = false;
     renderDetailContent();
     tabs.forEach(t => t.classList.remove('active'));
     showView('view-detail', fest.key);
+    // 화면이 실제로 보인 다음에 지도를 초기화해야 함 - 숨겨진 상태(display:none)에서
+    // 만들면 크기 계산이 깨짐
+    setTimeout(() => initDetailMap(fest), 50);
 }
 
 function showFestivalDetail(idx) {
@@ -953,6 +982,12 @@ function renderDetailContent() {
         `<div class="detail-row"><span class="label">${icon}</span><span>${text}</span></div>`
     ).join('');
 
+    // 좌표가 있을 때만 미니 지도 자리를 만듦 (실제 초기화는 openDetailForFest에서
+    // 화면이 보인 다음에 별도로 함 - 숨겨진 상태에서 지도를 만들면 깨짐)
+    const miniMapHtml = (fest.lat && fest.lng)
+        ? `<div id="detail-mini-map" class="detail-mini-map"></div>`
+        : '';
+
     document.getElementById('detail-content').innerHTML = `
         <div class="detail-layout">
             <div class="detail-layout-image">${imageHtml}</div>
@@ -964,6 +999,7 @@ function renderDetailContent() {
                     ${origToggleHtml}
                 </div>
                 ${rowsHtml}
+                ${miniMapHtml}
                 ${summary ? `<p class="detail-summary">${summary}</p>` : ''}
                 ${d.program ? `<p class="detail-summary"><strong>${L.program}</strong><br>${d.program}</p>` : ''}
                 ${d.subEvent ? `<p class="detail-summary"><strong>${L.subEvent}</strong><br>${d.subEvent}</p>` : ''}
