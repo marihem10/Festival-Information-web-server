@@ -160,7 +160,7 @@ const SUBCATEGORY_JA = {
     '오페라': 'オペラ',
     '무용': '舞踊',
     '클래식음악회': 'クラシックコンサート',
-    '대중콘서트': '大衆コンサート',
+    '대중콘서트': 'コンサート',
     '영화': '映画',
     '기타공연': 'その他公演',
     '넌버벌': 'ノンバーバル',
@@ -170,11 +170,22 @@ const SUBCATEGORY_JA = {
     '기타행사': 'その他イベント'
 };
 
+// 👉 지역(부산/경남/울산) 판별 - hub 응답 자체엔 이 항목이 명확히 안 들어있어서,
+// 원문(한국어) 주소 텍스트에 어떤 지명이 포함되어 있는지로 판단함
+const REGION_ORDER = ['부산', '경남', '울산'];
+const REGION_JA = { '부산': '釜山', '경남': '慶尚南道', '울산': '蔚山' };
+function deriveRegion(koreanText) {
+    if (koreanText && koreanText.includes('울산')) return '울산';
+    if (koreanText && koreanText.includes('부산')) return '부산';
+    return '경남';
+}
+
 function normalizeHubItem(item) {
     return {
         title: item.title || '',
         summary: item.outl || '',
         address: item.eventPlace || item.addr1 || '',
+        region: REGION_JA[deriveRegion(item.orig_eventPlace || item.orig_addr1 || '')],
         // 👉 대분류(行事/祭り/パフォーマンス)는 category, 세부분류(전통역사축제 등)는
         // subCategory로 따로 보관 - 대분류 먼저 고르고 그 안에서 세부분류를 고르는
         // 2단계 필터로 씀 (한 번에 세부분류 20개를 다 보여주면 너무 많아서)
@@ -226,6 +237,7 @@ function normalizeSimpleItem(item) {
         title: item.title || '',
         summary: item.summary || '',
         address: item.place || item.address || '',
+        region: REGION_JA[deriveRegion(item.orig_place || '')],
         category: item.category || '',
         subCategory: '', // 직접추가 항목은 세부분류 개념이 없음 - 대분류에서만 뜸
         image: item.image || '',
@@ -386,6 +398,28 @@ function renderSubTagFilterChips(containerId, sourceList, broadFilter, activeSub
     });
 }
 
+// 👉 지역(釜山/慶尚南道/蔚山) 필터 칩 - 카테고리/상태 필터랑 같은 줄에, 토글 방식으로
+function renderRegionFilterChips(containerId, sourceList, activeFilter, onSelect) {
+    const container = document.getElementById(containerId);
+    const present = new Set(sourceList.map(f => f.region).filter(Boolean));
+    const orderedJa = REGION_ORDER.map(ko => REGION_JA[ko]);
+    const regions = orderedJa.filter(r => present.has(r));
+    if (regions.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    container.innerHTML = regions.map(r => {
+        const active = activeFilter === r;
+        return `<span class="tag-chip region-chip ${active ? 'active' : ''}" data-region="${r}">${r}</span>`;
+    }).join('');
+    container.querySelectorAll('.tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const val = chip.getAttribute('data-region');
+            onSelect(activeFilter === val ? null : val);
+        });
+    });
+}
+
 function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
     const container = document.getElementById(containerId);
     const options = [
@@ -410,10 +444,12 @@ let searchQuery = '';
 let homeTagFilter = null;
 let homeSubTagFilter = null;
 let homeStatusFilter = null;
+let homeRegionFilter = null;
 const PAGE_SIZE = 6;
 
 function getFilteredList() {
     let list = allFestivalsCache;
+    if (homeRegionFilter) list = list.filter(f => f.region === homeRegionFilter);
     if (homeStatusFilter) list = list.filter(f => f.status.key === homeStatusFilter);
     if (homeTagFilter) list = list.filter(f => f.category === homeTagFilter);
     if (homeSubTagFilter) list = list.filter(f => f.subCategory === homeSubTagFilter);
@@ -549,7 +585,14 @@ function renderPage() {
     const start = (currentPage - 1) * PAGE_SIZE;
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
-    renderFestivals(pageItems, true, filtered.length, 'festival-grid', '該当するイベントが見つかりませんでした。');
+    // ⚠️ 순서 중요: 필터 칩들(특히 세부분류 줄)을 먼저 그려서 화면 높이가 확정된 다음에
+    // renderFestivals를 불러야 함 - renderFestivals 안에서 카드 높이를 계산하는데,
+    // 그걸 먼저 하면 세부분류 줄이 나타나기/사라지기 전 높이로 잘못 계산해서 스크롤이 생김
+    renderRegionFilterChips('region-filter-wrap', allFestivalsCache, homeRegionFilter, (region) => {
+        homeRegionFilter = region;
+        currentPage = 1;
+        renderPage();
+    });
     renderStatusFilterButtons('status-filter-wrap', homeStatusFilter, (status) => {
         homeStatusFilter = status;
         currentPage = 1;
@@ -566,6 +609,7 @@ function renderPage() {
         currentPage = 1;
         renderPage();
     });
+    renderFestivals(pageItems, true, filtered.length, 'festival-grid', '該当するイベントが見つかりませんでした。');
     renderPaginationControls(totalPages, 'pagination-controls', currentPage, (p) => { currentPage = p; renderPage(); });
 }
 
@@ -573,6 +617,7 @@ let bookmarkPage = 1;
 let bookmarkTagFilter = null;
 let bookmarkStatusFilter = null;
 let bookmarkSubTagFilter = null;
+let bookmarkRegionFilter = null;
 
 function getBookmarkedList() {
     return allFestivalsCache.filter(f => bookmarkedKeys.has(f.key));
@@ -580,6 +625,7 @@ function getBookmarkedList() {
 
 function getFilteredBookmarkList() {
     let list = getBookmarkedList();
+    if (bookmarkRegionFilter) list = list.filter(f => f.region === bookmarkRegionFilter);
     if (bookmarkStatusFilter) list = list.filter(f => f.status.key === bookmarkStatusFilter);
     if (bookmarkTagFilter) list = list.filter(f => f.category === bookmarkTagFilter);
     if (bookmarkSubTagFilter) list = list.filter(f => f.subCategory === bookmarkSubTagFilter);
@@ -593,7 +639,11 @@ function renderBookmarkPage() {
     const start = (bookmarkPage - 1) * PAGE_SIZE;
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
-    renderFestivals(pageItems, true, filtered.length, 'bookmark-grid', 'まだブックマークしたイベントがありません。');
+    renderRegionFilterChips('bookmark-region-filter-wrap', getBookmarkedList(), bookmarkRegionFilter, (region) => {
+        bookmarkRegionFilter = region;
+        bookmarkPage = 1;
+        renderBookmarkPage();
+    });
     renderStatusFilterButtons('bookmark-status-filter-wrap', bookmarkStatusFilter, (status) => {
         bookmarkStatusFilter = status;
         bookmarkPage = 1;
@@ -610,6 +660,7 @@ function renderBookmarkPage() {
         bookmarkPage = 1;
         renderBookmarkPage();
     });
+    renderFestivals(pageItems, true, filtered.length, 'bookmark-grid', 'まだブックマークしたイベントがありません。');
     renderPaginationControls(totalPages, 'bookmark-pagination-controls', bookmarkPage, (p) => { bookmarkPage = p; renderBookmarkPage(); });
 }
 

@@ -739,6 +739,16 @@ header h1 {
     color: white;
     border-color: #34c759;
 }
+/* 👉 지역 칩은 카테고리/상태 필터랑 헷갈리지 않게 청록색 계열로 구분 */
+.region-chip {
+    color: #0d8a8a;
+    border-color: rgba(13, 138, 138, 0.3);
+}
+.region-chip.active {
+    background: #0d8a8a;
+    color: white;
+    border-color: #0d8a8a;
+}
 .status-label-short {
     display: none;
 }

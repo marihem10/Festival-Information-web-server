@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0056b3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="logo.png">
     <title>釜山フェスナビ</title>
@@ -58,6 +58,7 @@
                 </div>
             </div>
             <div class="filter-row">
+                <div id="region-filter-wrap" class="tag-filter-wrap"></div>
                 <div id="tag-filter-wrap" class="tag-filter-wrap"></div>
                 <div id="status-filter-wrap" class="tag-filter-wrap"></div>
             </div>
@@ -108,10 +109,11 @@
         <div id="view-bookmarks" class="view-section" style="display: none;">
             <header><h1>ブックマーク</h1></header>
             <div class="filter-row">
+                <div id="bookmark-region-filter-wrap" class="tag-filter-wrap"></div>
                 <div id="bookmark-tag-filter-wrap" class="tag-filter-wrap"></div>
                 <div id="bookmark-status-filter-wrap" class="tag-filter-wrap"></div>
             </div>
-            <div id="sub-tag-filter-wrap" class="tag-filter-wrap sub-filter-row"></div>
+            <div id="bookmark-sub-tag-filter-wrap" class="tag-filter-wrap sub-filter-row"></div>
             <div id="bookmark-grid-wrap">
                 <div id="bookmark-grid"></div>
             </div>
