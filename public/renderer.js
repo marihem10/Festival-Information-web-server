@@ -283,6 +283,8 @@ function normalizeSimpleItem(item) {
         summary: item.summary || '',
         address: item.place || item.address || '',
         region: REGION_JA[deriveRegion(`${item.orig_title || ''} ${item.orig_place || ''}`)],
+        lat: item.lat || '',
+        lng: item.lng || '',
         category: item.category || '',
         subCategory: '', // 직접추가 항목은 세부분류 개념이 없음 - 대분류에서만 뜸
         image: item.image || '',
