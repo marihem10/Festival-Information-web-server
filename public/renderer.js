@@ -127,6 +127,49 @@ function stripHtml(s) {
     return (s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+// 👉 한국관광콘텐츠랩의 카테고리 체계는 개수가 정해져 있어서(대분류 3개, 세부분류 20개),
+// 자동번역 대신 직접 정확한 일본어로 사전을 만들어둠. 이러면:
+// ① 번역이 항상 정확하고 자연스러움 (자동번역의 어색한 표현 문제 없음)
+// ② 표시 순서가 항상 고정됨 (데이터에 어느 게 먼저 나오는지와 무관)
+// 이 목록에 없는 값이 나오면(향후 분류 추가 등) 원문 그대로 보여줌(안 깨지게)
+const CATEGORY_ORDER = ['행사', '축제', '공연'];
+const CATEGORY_JA = {
+    '축제': '祭り',
+    '공연': '公演',
+    '행사': 'イベント'
+};
+
+const SUBCATEGORY_ORDER = [
+    // 축제
+    '문화관광축제', '문화예술축제', '지역특산물축제', '전통역사축제', '생태자연축제', '기타축제',
+    // 공연
+    '전통공연', '연극', '뮤지컬', '오페라', '무용', '클래식음악회', '대중콘서트', '영화', '기타공연', '넌버벌',
+    // 행사
+    '전시회', '박람회', '스포츠경기', '기타행사'
+];
+const SUBCATEGORY_JA = {
+    '문화관광축제': '文化観光祭り',
+    '문화예술축제': '文化芸術祭り',
+    '지역특산물축제': '地域特産物祭り',
+    '전통역사축제': '伝統歴史祭り',
+    '생태자연축제': '生態自然祭り',
+    '기타축제': 'その他祭り',
+    '전통공연': '伝統公演',
+    '연극': '演劇',
+    '뮤지컬': 'ミュージカル',
+    '오페라': 'オペラ',
+    '무용': '舞踊',
+    '클래식음악회': 'クラシックコンサート',
+    '대중콘서트': '大衆コンサート',
+    '영화': '映画',
+    '기타공연': 'その他公演',
+    '넌버벌': 'ノンバーバル',
+    '전시회': '展示会',
+    '박람회': '博覧会',
+    '스포츠경기': 'スポーツ競技',
+    '기타행사': 'その他イベント'
+};
+
 function normalizeHubItem(item) {
     return {
         title: item.title || '',
@@ -135,8 +178,8 @@ function normalizeHubItem(item) {
         // 👉 대분류(行事/祭り/パフォーマンス)는 category, 세부분류(전통역사축제 등)는
         // subCategory로 따로 보관 - 대분류 먼저 고르고 그 안에서 세부분류를 고르는
         // 2단계 필터로 씀 (한 번에 세부분류 20개를 다 보여주면 너무 많아서)
-        category: item.cat2Nm || item.cat1Nm || '',
-        subCategory: item.cat3Nm || '',
+        category: CATEGORY_JA[item.cat2Nm] || item.cat2Nm || item.cat1Nm || '',
+        subCategory: SUBCATEGORY_JA[item.cat3Nm] || item.cat3Nm || '',
         image: item.firstImage || item.firstImage2 || '',
         homepage: extractUrl(item.hmpg),
         startDate: ymdToIso(item.eventStartDate),
@@ -161,8 +204,8 @@ function normalizeHubItem(item) {
             title: item.orig_title || '',
             summary: item.orig_outl || '',
             address: item.orig_eventPlace || item.orig_addr1 || '',
-            category: item.orig_cat2Nm || item.orig_cat1Nm || '',
-            subCategory: item.orig_cat3Nm || '',
+            category: item.cat2Nm || item.cat1Nm || '',
+            subCategory: item.cat3Nm || '',
             playTime: stripHtml(item.orig_playTime),
             program: stripHtml(item.orig_program),
             subEvent: stripHtml(item.orig_subEvent),
@@ -290,18 +333,26 @@ function refreshAfterBookmarkChange() {
 
 function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
     const container = document.getElementById(containerId);
-    const categories = [...new Set(sourceList.map(f => f.category).filter(Boolean))];
+    const present = new Set(sourceList.map(f => f.category).filter(Boolean));
+    // 고정 순서(CATEGORY_ORDER)를 일본어로 바꾼 뒤, 실제 데이터에 있는 것만 남김 -
+    // 이러면 데이터가 바뀌어도(축제 상태 변화 등) 순서는 항상 똑같이 유지됨
+    const orderedJa = CATEGORY_ORDER.map(ko => CATEGORY_JA[ko]);
+    const extras = [...present].filter(c => !orderedJa.includes(c)); // 사전에 없는 예상 밖 값은 뒤에
+    const categories = [...orderedJa, ...extras].filter(c => present.has(c));
     if (categories.length === 0) {
         container.innerHTML = '';
         return;
     }
-    const chips = [{ label: 'すべて', val: '' }, ...categories.map(c => ({ label: c, val: c }))];
-    container.innerHTML = chips.map(c => {
-        const active = c.val === '' ? !activeFilter : activeFilter === c.val;
-        return `<span class="tag-chip ${active ? 'active' : ''}" data-cat="${c.val}">${c.label}</span>`;
+    // 開催中/開催予定 버튼과 똑같은 토글 방식 - すべて 칩 없이, 같은 걸 다시 누르면 해제됨
+    container.innerHTML = categories.map(c => {
+        const active = activeFilter === c;
+        return `<span class="tag-chip ${active ? 'active' : ''}" data-cat="${c}">${c}</span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
-        chip.addEventListener('click', () => onSelect(chip.getAttribute('data-cat') || null));
+        chip.addEventListener('click', () => {
+            const val = chip.getAttribute('data-cat');
+            onSelect(activeFilter === val ? null : val);
+        });
     });
 }
 
@@ -314,18 +365,24 @@ function renderSubTagFilterChips(containerId, sourceList, broadFilter, activeSub
         return;
     }
     const relevant = sourceList.filter(f => f.category === broadFilter);
-    const subCategories = [...new Set(relevant.map(f => f.subCategory).filter(Boolean))];
+    const present = new Set(relevant.map(f => f.subCategory).filter(Boolean));
+    const orderedJa = SUBCATEGORY_ORDER.map(ko => SUBCATEGORY_JA[ko]);
+    const extras = [...present].filter(c => !orderedJa.includes(c));
+    const subCategories = [...orderedJa, ...extras].filter(c => present.has(c));
     if (subCategories.length === 0) {
         container.innerHTML = '';
         return;
     }
-    const chips = [{ label: 'すべて', val: '' }, ...subCategories.map(c => ({ label: c, val: c }))];
-    container.innerHTML = chips.map(c => {
-        const active = c.val === '' ? !activeSubFilter : activeSubFilter === c.val;
-        return `<span class="tag-chip sub-chip ${active ? 'active' : ''}" data-subcat="${c.val}">${c.label}</span>`;
+    // "└" 화살표를 붙여서 위 대분류의 하위 항목이라는 걸 시각적으로 더 명확하게 함
+    container.innerHTML = subCategories.map(c => {
+        const active = activeSubFilter === c;
+        return `<span class="tag-chip sub-chip ${active ? 'active' : ''}" data-subcat="${c}">└ ${c}</span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
-        chip.addEventListener('click', () => onSelect(chip.getAttribute('data-subcat') || null));
+        chip.addEventListener('click', () => {
+            const val = chip.getAttribute('data-subcat');
+            onSelect(activeSubFilter === val ? null : val);
+        });
     });
 }
 

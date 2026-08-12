@@ -677,17 +677,32 @@ header h1 {
 /* 👉 세부분류 줄 - 대분류 밑에 살짝 들여쓰고, 칩도 한 단계 작게 만들어서
    "이건 위에서 고른 대분류의 하위 항목"이라는 게 시각적으로 느껴지게 함 */
 .sub-filter-row {
-    padding-left: 16px;
-    margin-top: -6px;
+    padding: 8px 10px;
+    margin-top: -4px;
+    margin-bottom: 14px !important;
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px dashed rgba(0, 86, 179, 0.25);
+    border-radius: 12px;
+}
+.sub-filter-row:empty {
+    display: none;
+    padding: 0;
+    border: none;
+    margin: 0;
 }
 .sub-filter-row .tag-chip {
     padding: 4px 12px;
+    border-radius: 8px;
     font-size: 11px;
-    background: rgba(255, 255, 255, 0.35);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.4);
+    color: var(--primary-blue);
+    border-color: rgba(0, 86, 179, 0.2);
 }
 .sub-filter-row .tag-chip.active {
     background: var(--primary-blue);
-    opacity: 0.85;
+    color: white;
+    font-weight: 700;
 }
 .filter-row .tag-filter-wrap {
     margin-bottom: 0;

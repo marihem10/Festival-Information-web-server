@@ -296,8 +296,12 @@ async function enrichWithDates(items, concurrency = 15) {
 }
 
 // --- 번역 (main.js와 동일 - DeepL 우선, 한도초과/실패 시 구글로 자동 전환) ---
+// 👉 cat2Nm/cat3Nm(카테고리)은 여기서 뺐음 - 한국관광콘텐츠랩의 분류가 개수가 정해져 있어서
+// (대분류 3개, 세부분류 20개), 자동번역 대신 renderer.js에 직접 정확한 일본어 사전을
+// 만들어서 씀. 자동번역은 어색한 표현이 나올 수 있고, 표시 순서도 매번 흔들려서
+// (데이터에 먼저 나오는 순서를 그대로 썼었음) 이 방식이 더 안정적임.
 const HUB_TRANSLATABLE_FIELDS = [
-  'title', 'outl', 'addr1', 'cat1Nm', 'cat2Nm', 'cat3Nm', 'eventPlace', 'playTime', 'program', 'subEvent',
+  'title', 'outl', 'addr1', 'eventPlace', 'playTime', 'program', 'subEvent',
   'sponsor1', 'sponsor2', 'ageLimit', 'bookingPlace', 'discountInfo', 'placeInfo', 'progressType', 'useFee'
 ];
 const SIMPLE_TRANSLATABLE_FIELDS = [
