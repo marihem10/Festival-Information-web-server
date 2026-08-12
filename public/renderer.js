@@ -1255,6 +1255,18 @@ let mapMarkers = [];
 // 👉 MapTiler 무료 API 키를 여기 넣어주세요 (https://cloud.maptiler.com/account/keys/ 에서 발급)
 const MAPTILER_API_KEY = 'pLCMDRRAKjsl0vNzevy6';
 
+// 👉 상태(開催中=주황/開催予定=초록)에 맞춰 핀 색을 다르게 만드는 함수 -
+// 카드/상세페이지에 뜨는 status-badge 색이랑 통일함
+function createColoredMarkerIcon(color) {
+    return L.divIcon({
+        className: 'custom-map-marker',
+        html: `<svg viewBox="0 0 24 24" width="30" height="30" fill="${color}" stroke="white" stroke-width="1.2"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 7 12 7.29 12.29a1 1 0 0 0 1.42 0C13 22 20 15.25 20 10c0-4.42-3.58-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 30], // 핀의 뾰족한 끝이 실제 좌표를 정확히 가리키게
+        popupAnchor: [0, -28]
+    });
+}
+
 function initMapIfNeeded() {
     if (leafletMap) return;
     // 부산+경남+울산이 대충 다 보이는 위치/줌으로 시작
@@ -1301,7 +1313,8 @@ function renderMapView() {
                 <button onclick="showFestivalDetailByKey('${fest.key}')" style="font-size:12px; padding:5px 12px; border-radius:8px; border:none; background:#007AFF; color:white; cursor:pointer; font-family:'Noto Sans JP', sans-serif;">詳細を見る</button>
             </div>
         `;
-        const marker = L.marker([lat, lng]).addTo(leafletMap);
+        const pinColor = fest.status?.key === 'ongoing' ? '#ff9500' : fest.status?.key === 'upcoming' ? '#34c759' : '#8a8a8e';
+        const marker = L.marker([lat, lng], { icon: createColoredMarkerIcon(pinColor) }).addTo(leafletMap);
         marker.bindPopup(popupHtml);
         mapMarkers.push(marker);
     });
