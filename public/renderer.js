@@ -1252,13 +1252,16 @@ window.addEventListener('resize', () => {
 let leafletMap = null;
 let mapMarkers = [];
 
+// 👉 MapTiler 무료 API 키를 여기 넣어주세요 (https://cloud.maptiler.com/account/keys/ 에서 발급)
+const MAPTILER_API_KEY = 'YOUR_MAPTILER_API_KEY';
+
 function initMapIfNeeded() {
     if (leafletMap) return;
     // 부산+경남+울산이 대충 다 보이는 위치/줌으로 시작
     leafletMap = L.map('map-container').setView([35.15, 128.55], 9);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
+    L.maptiler.maptilerLayer({
+        apiKey: MAPTILER_API_KEY,
+        language: L.MaptilerLanguage.JAPANESE // 지도 자체(도로명/지명)도 일본어로 표시
     }).addTo(leafletMap);
 }
 
@@ -1268,7 +1271,9 @@ function renderMapView() {
     // 화면에 다시 보인 직후 한 번 더 크기를 재계산해줌
     setTimeout(() => leafletMap.invalidateSize(), 50);
 
-    const list = getFilteredList(); // 홈 화면 필터를 그대로 재사용
+    // 홈 화면 필터랑 별개로 독립적으로 동작 - 지도는 항상 "지금 갈 만한 곳 전체"를 보여줌
+    // (홈에서 뭘 필터링해놨든 지도엔 영향 안 줌). 종료된 축제만 항상 제외함.
+    const list = allFestivalsCache.filter(f => f.status.key !== 'ended');
 
     mapMarkers.forEach(m => leafletMap.removeLayer(m));
     mapMarkers = [];
