@@ -1,4 +1,4 @@
-// 🖥️ 釜山フェスナビ - 백엔드 서버
+// 🖥️ フェスナビ - 백엔드 서버
 // main.js(Electron)가 하던 "hub 호출 + 번역 + 캐시 + Firestore" 로직을 그대로 가져와서
 // 웹 서버(Express)로 감싼 버전. 폰(PWA)이든 데스크톱 웹이든, 여기 하나에만 물어보면 됨.
 //
@@ -526,5 +526,5 @@ app.get('/api/festivals', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`[server] DATA_GO_KR_API_KEY 길이: ${config.DATA_GO_KR_API_KEY.length}자 (0이면 .env에 안 채워진 것)`);
-  console.log(`[server] 釜山フェスナビ 서버 실행 중 - http://localhost:${PORT}`);
+  console.log(`[server] フェスナビ 서버 실행 중 - http://localhost:${PORT}`);
 });

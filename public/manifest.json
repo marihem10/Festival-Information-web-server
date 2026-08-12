@@ -1,7 +1,7 @@
 {
-  "name": "釜山フェスナビ",
+  "name": "フェスナビ",
   "short_name": "フェスナビ",
-  "description": "日本人旅行者のための釜山フェスティバル・イベント情報アプリ",
+  "description": "日本人旅行者のための釜山・慶尚南道・蔚山フェスティバル・イベント情報アプリ",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
