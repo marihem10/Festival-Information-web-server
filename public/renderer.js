@@ -576,7 +576,7 @@ async function fetchFestivals() {
             renderPage();
             renderCalendar();
 
-            setTimeout(() => adjustCardImageHeights('festival-grid'), 300);
+
         } else {
             throw new Error(errors.join('\n') || '조건에 맞는 축제/행사 데이터가 0개입니다.');
         }
@@ -628,8 +628,6 @@ function renderPage() {
         renderPage();
     });
     renderFestivals(pageItems, true, filtered.length, 'festival-grid', '該当するイベントが見つかりませんでした。');
-    // 혹시 폰트/이미지 로딩 등으로 뒤늦게 레이아웃이 살짝 바뀌는 경우를 대비한 안전장치 - 잠시 후 한 번 더 재계산
-    setTimeout(() => adjustCardImageHeights('festival-grid'), 50);
     renderPaginationControls(totalPages, 'pagination-controls', currentPage, (p) => { currentPage = p; renderPage(); });
 }
 
@@ -687,7 +685,6 @@ function renderBookmarkPage() {
         renderBookmarkPage();
     });
     renderFestivals(pageItems, true, filtered.length, 'bookmark-grid', 'まだブックマークしたイベントがありません。');
-    setTimeout(() => adjustCardImageHeights('bookmark-grid'), 50);
     renderPaginationControls(totalPages, 'bookmark-pagination-controls', bookmarkPage, (p) => { bookmarkPage = p; renderBookmarkPage(); });
 }
 
@@ -788,10 +785,18 @@ function adjustCardImageHeights(gridId) {
     document.documentElement.style.setProperty('--card-thumb-height', `${Math.floor(idealThumbHeight)}px`);
 }
 
-window.addEventListener('resize', () => {
+// 👉 카드 그리드 영역(festival-grid-wrap/bookmark-grid-wrap)의 "실제 크기가 바뀔 때마다"
+// 자동으로 카드 높이를 재계산함. 예전엔 "필터 바뀜 → 다시 그리기" 타이밍을 일일이 맞춰야
+// 했는데, 이 방식은 원인이 뭐든(필터 줄 높이 변화, 창 크기 변화, 폰트 로딩 등) 상관없이
+// 그 영역의 크기가 실제로 바뀌는 순간 브라우저가 알아서 알려줘서 훨씬 확실함.
+const cardHeightObserver = new ResizeObserver(() => {
     if (document.getElementById('view-home').style.display !== 'none') adjustCardImageHeights('festival-grid');
     if (document.getElementById('view-bookmarks').style.display !== 'none') adjustCardImageHeights('bookmark-grid');
 });
+const homeGridWrapEl = document.getElementById('festival-grid-wrap');
+const bookmarkGridWrapEl = document.getElementById('bookmark-grid-wrap');
+if (homeGridWrapEl) cardHeightObserver.observe(homeGridWrapEl);
+if (bookmarkGridWrapEl) cardHeightObserver.observe(bookmarkGridWrapEl);
 
 let currentDetailFest = null;
 let showingOriginalLang = false;
