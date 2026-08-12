@@ -580,6 +580,7 @@ async function fetchFestivals() {
 
         const merged = [...hub, ...extraItems]
             .filter((f, idx, arr) => arr.findIndex(x => looseKey(x.title) === looseKey(f.title)) === idx);
+        console.log(`[진단-단계] ①원본 합계(hub+직접추가)=${hub.length + extraItems.length}건 → ②제목중복제거후=${merged.length}건`);
 
         const rankOf = { ongoing: 0, upcoming: 1, unknown: 2, ended: 3 };
         const withStatusRaw = merged.map(f => ({ ...f, key: looseKey(f.title), status: getStatus(f) }));
@@ -597,6 +598,7 @@ async function fetchFestivals() {
             const daysSinceEnd = (cutoffToday - end) / 86400000;
             return daysSinceEnd <= ENDED_CUTOFF_DAYS;
         });
+        console.log(`[진단-단계] ③상태분류후=${withStatusRaw.length}건 → ④종료60일초과제외후=${withStatus.length}건 (제외된 개수: ${withStatusRaw.length - withStatus.length}건)`);
 
         const counts = withStatus.reduce((acc, f) => {
             acc[f.status.key] = (acc[f.status.key] || 0) + 1;
