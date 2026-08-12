@@ -12,21 +12,11 @@ let isHandlingPopState = false;
 
 function showView(id, detailKey = null) {
     views.forEach(v => v.style.display = 'none');
-    // 'block'으로 강제하면 view-home/view-bookmarks에 필요한 display:flex(CSS)를 덮어써버려서
-    // 화면 전환 후 레이아웃이 깨짐 - 인라인 스타일을 아예 지워서 CSS가 알아서 결정하게 함
     const target = document.getElementById(id);
     target.style.removeProperty('display');
-    // 화면 전환할 때마다 스크롤을 맨 위로 초기화
-    // - 모바일: 페이지 전체가 스크롤되는 구조라 window 스크롤을 리셋 안 하면
-    //   홈에서 아래로 스크롤한 상태로 상세페이지에 들어갔을 때 그 스크롤 위치 그대로 유지돼서
-    //   포스터(맨 위)가 아니라 화면 중간부터 보이는 문제가 생김
-    // - 데스크톱: 각 view-section이 자기만의 스크롤을 갖고 있어서, 이전에 그 화면을 스크롤해둔 채
-    //   놔뒀다가 다시 들어가면 그 위치 그대로 열리는 문제가 있어서 같이 리셋함
     target.scrollTop = 0;
     window.scrollTo(0, 0);
 
-    // 📱 화면 전환마다 브라우저 히스토리에 기록을 남김 - 이게 없으면 폰에서 뒤로가기를
-    // 눌렀을 때 "이 사이트 안에서 갈 곳이 없다"고 판단해서 앱 자체가 꺼져버림
     if (!isHandlingPopState) {
         const state = { view: id };
         if (id === 'view-detail' && detailKey) state.festKey = detailKey;
@@ -34,11 +24,8 @@ function showView(id, detailKey = null) {
     }
 }
 
-// 페이지가 처음 열렸을 때를 "홈" 기준점으로 히스토리에 남겨둠 (새 기록을 추가하는 게 아니라
-// 지금 있는 기록을 덮어씀 - 그래야 홈 화면에서 뒤로가기 눌렀을 때 정상적으로 앱이 종료됨)
 history.replaceState({ view: 'view-home' }, '', '#view-home');
 
-// 폰/브라우저의 "뒤로가기"를 앱 안에서 처리 - 이전 화면으로 돌아가고, 그 화면에 맞게 다시 그려줌
 window.addEventListener('popstate', (e) => {
     isHandlingPopState = true;
     const state = e.state || { view: 'view-home' };
@@ -73,7 +60,6 @@ tabs.forEach(tab => {
 
 let lastViewBeforeDetail = 'view-home';
 
-// --- 🏠 로고 누르면 홈으로 ---
 document.querySelectorAll('.logo').forEach(el => {
     el.addEventListener('click', () => {
         closeMobileMenu();
@@ -83,9 +69,6 @@ document.querySelectorAll('.logo').forEach(el => {
     });
 });
 document.getElementById('detail-back-btn').addEventListener('click', () => {
-    // 여기서 바로 showView를 부르면 히스토리에 새 기록이 쌓여서(뒤로가기가 아니라 전진처럼 취급됨)
-    // 폰 뒤로가기 버튼이랑 동작이 어긋나게 됨 - history.back()으로 통일해서 popstate 핸들러가
-    // 알아서 이전 화면을 복원하게 함 (= 폰 뒤로가기 눌렀을 때랑 똑같이 동작)
     history.back();
 });
 
@@ -93,7 +76,6 @@ document.getElementById('sidebar-toggle').addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('collapsed');
 });
 
-// --- 📱 모바일 햄버거 메뉴 (슬라이드 서랍) ---
 const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
 const sidebarBackdrop = document.getElementById('sidebar-backdrop');
 const sidebarEl = document.getElementById('sidebar');
@@ -122,7 +104,6 @@ function parseIso(s) {
     return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
 }
 
-// 시작일=종료일(하루짜리 축제)이면 날짜를 한 번만 보여주고, 아니면 "시작 ~ 종료"로 보여줌
 function formatDateRange(fest) {
     if (!fest.startDate) return '';
     const start = fest.startDate.replace(/-/g, '.');
@@ -130,19 +111,12 @@ function formatDateRange(fest) {
     return start === end ? start : `${start} ~ ${end}`;
 }
 
-// hub의 hmpg 필드는 "공식 홈페이지 https://..." 처럼 설명 텍스트가 섞여서 오는 경우가 있어서
-// 순수 URL 부분만 뽑아냄
 function extractUrl(text) {
     if (!text) return '';
     const m = text.match(/https?:\/\/[^\s"'<>]+/);
     return m ? m[0] : '';
 }
 
-// 지도 링크 생성: 좌표가 있으면 좌표 우선(번역 오역 위험 없음), 없으면 원문(한국어) 주소로 검색
-// (번역된 일본어 주소로 검색하면 오역 때문에 엉뚱한 곳이 나올 위험이 있어서 원문을 우선함)
-// 네이버지도로 연결 - 부산 같은 국내 위치는 구글맵보다 네이버지도가 훨씬 정확함(구글맵은
-// 한국 내 지도 데이터가 부실한 경우가 많음). 번역된 일본어 주소 대신 원문(한국어) 주소로
-// 검색해서, 오역 때문에 엉뚱한 곳이 나오는 걸 방지함.
 function getMapUrl(fest) {
     const addr = (fest.orig && fest.orig.address) || fest.address;
     if (!addr || addr === '場所未定') return '';
@@ -176,12 +150,9 @@ function normalizeHubItem(item) {
         progressType: stripHtml(item.progressType),
         spendTime: stripHtml(item.spendTime),
         useFee: stripHtml(item.useFee),
-        // 위/경도 좌표 - 있으면 지도 연결에 이걸 우선 사용(번역 오역 위험이 없음)
         lat: item.lat || item.mapy || '',
         lng: item.lng || item.mapx || '',
-        // kuromoji로 자동 생성된 요미가나(읽는 법) - 한자↔히라가나 검색용 (고유명사는 부정확할 수 있음)
         reading: item.reading || '',
-        // 🇰🇷 번역 전 원문(한국어) - 상세페이지 "원문 보기" 토글용. hub 항목에만 있음(직접추가/큐레이션은 이미 일본어라 없음).
         orig: {
             title: item.orig_title || '',
             summary: item.orig_outl || '',
@@ -223,9 +194,7 @@ function normalizeSimpleItem(item) {
         discountInfo: item.discountInfo || '',
         placeInfo: item.placeInfo || '',
         useFee: item.useFee || '',
-        // 👉 요미가나(읽는 법) - 직접 입력한 항목에만 있을 수 있음. 한자↔히라가나 검색 매칭용
         reading: item.reading || '',
-        // 🇰🇷 번역 전 원문(한국어) - main.js가 채워준 orig_* 필드에서 가져옴
         orig: {
             title: item.orig_title || '',
             summary: item.orig_summary || '',
@@ -245,7 +214,6 @@ function normalizeSimpleItem(item) {
     };
 }
 
-// --- 아이콘 (이모지 대신 심플한 SVG 사용) ---
 const ICON_CALENDAR = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px;"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>';
 const ICON_PIN = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px;"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>';
 const ICON_DOT = '<svg viewBox="0 0 8 8" width="8" height="8" fill="currentColor" style="margin-top:6px; flex-shrink:0;"><circle cx="4" cy="4" r="4"/></svg>';
@@ -256,18 +224,14 @@ function looseKey(s) {
     return (s || '').replace(/\s|\(|\)|[0-9]/g, '').toLowerCase();
 }
 
-// 가타카나를 히라가나로 통일해서, 검색할 때 "とうきょう"랑 "トウキョウ"가 같은 결과를 내게 함
-// (유니코드에서 히라가나/가타카나는 정확히 같은 순서라, 코드값에 고정된 차이(0x60)만 빼주면 변환됨)
 function katakanaToHiragana(s) {
     return (s || '').replace(/[\u30A1-\u30F6]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
 }
 
-// 검색용으로 텍스트를 정규화: 소문자 + 가타카나→히라가나 통일
 function normalizeForSearch(s) {
     return katakanaToHiragana((s || '').toLowerCase());
 }
 
-// 진행상태 계산: ongoing(진행중) / upcoming(예정) / ended(종료) / unknown(날짜없음)
 function getStatus(fest) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -282,7 +246,6 @@ function getStatus(fest) {
     return { key: 'ended', label: '終了' };
 }
 
-// --- ⭐ 북마크 ---
 let bookmarkedKeys = new Set();
 
 async function loadBookmarks() {
@@ -319,7 +282,6 @@ function refreshAfterBookmarkChange() {
     renderCalendar();
 }
 
-// --- 🏷️ 태그 필터 ---
 function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
     const container = document.getElementById(containerId);
     const categories = [...new Set(sourceList.map(f => f.category).filter(Boolean))];
@@ -337,9 +299,6 @@ function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
     });
 }
 
-// --- 🟠🟢 상태(開催中/開催予定) 토글 버튼 ---
-// 태그 필터랑 다르게, 이건 "단일 선택 목록"이 아니라 각 버튼이 독립적인 온/오프 토글임.
-// 開催中 누르면 진행중인 것만, 다시 누르면 해제(전체 보기)로 돌아감. 開催予定도 마찬가지.
 function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
     const container = document.getElementById(containerId);
     const options = [
@@ -348,14 +307,11 @@ function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
     ];
     container.innerHTML = options.map(o => {
         const active = activeFilter === o.val;
-        // 데스크톱은 전체 글자(label)를 보여주고, 모바일은 CSS로 짧은 글자(short)만
-        // 동그라미 아이콘 안에 보여줌 - title 속성이 있어서 길게 눌러도 무슨 뜻인지 알 수 있음
         return `<span class="tag-chip ${o.cls} ${active ? 'active' : ''}" data-status="${o.val}" title="${o.label}"><span class="status-label-full">${o.label}</span><span class="status-label-short">${o.short}</span></span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             const val = chip.getAttribute('data-status');
-            // 이미 켜져있는 버튼을 다시 누르면 꺼짐(null=전체보기), 아니면 그 상태로 켜짐
             onToggle(activeFilter === val ? null : val);
         });
     });
@@ -365,7 +321,7 @@ let allFestivalsCache = [];
 let currentPage = 1;
 let searchQuery = '';
 let homeTagFilter = null;
-let homeStatusFilter = null; // null(전체) / 'ongoing' / 'upcoming'
+let homeStatusFilter = null;
 const PAGE_SIZE = 6;
 
 function getFilteredList() {
@@ -391,7 +347,6 @@ document.getElementById('festival-search-input').addEventListener('input', (e) =
 
 function renderLoadingUI() {
     const grid = document.getElementById('festival-grid');
-    // 카드가 없을 때(로딩 중)는 그리드 대신 flex로 바꿔서 화면 중앙에 오게 함
     grid.style.display = 'flex';
     grid.style.alignItems = 'center';
     grid.style.justifyContent = 'center';
@@ -419,11 +374,11 @@ function updateLoadingUI({ stage, current, total }) {
     } else if (stage === 'detail') {
         text.textContent = '日程・詳細情報を取得しています...';
         sub.textContent = `${current} / ${total}`;
-        bar.style.width = `${5 + (current / total) * 45}%`; // 전체의 5~50% 구간
+        bar.style.width = `${5 + (current / total) * 45}%`;
     } else if (stage === 'translate') {
         text.textContent = '日本語に翻訳しています...';
         sub.textContent = `${current} / ${total}`;
-        bar.style.width = `${50 + (current / total) * 50}%`; // 전체의 50~100% 구간
+        bar.style.width = `${50 + (current / total) * 50}%`;
     }
 }
 
@@ -440,16 +395,25 @@ async function fetchFestivals() {
         const hub = hubItems.map(normalizeHubItem);
         const extraItems = extra.map(normalizeSimpleItem);
 
-        // 전부 합치고, 제목 기준으로 중복 제거
-        // hub가 더 최신으로 계속 갱신되는 소스라서, 겹치면 hub 쪽을 우선함.
-        // hub 데이터에 문제가 있는 특정 항목은 main.js의 HUB_EXCLUDE_KEYWORDS로 콕 집어서 걸러냄.
         const merged = [...hub, ...extraItems]
             .filter((f, idx, arr) => arr.findIndex(x => looseKey(x.title) === looseKey(f.title)) === idx);
 
-        // 이제 과거 축제도 포함해서 다 보여줌. 대신 정렬 순서를 지능적으로:
-        // 1) 진행중 먼저(종료임박순), 2) 예정(임박순), 3) 종료(최근에 끝난 것 먼저), 4) 날짜없음
         const rankOf = { ongoing: 0, upcoming: 1, ended: 2, unknown: 3 };
-        const withStatus = merged.map(f => ({ ...f, key: looseKey(f.title), status: getStatus(f) }));
+        const withStatusRaw = merged.map(f => ({ ...f, key: looseKey(f.title), status: getStatus(f) }));
+
+        // 👉 종료된 지 너무 오래된 축제는 목록에서 아예 제외 (고객 피드백: "종료된 건 많이 볼 필요 없음")
+        // 특정 연도로 딱 자르면 해마다 코드를 손봐야 해서, 대신 "종료 후 N일"이라는 굴러가는
+        // 기준을 씀 - 이러면 시간이 지나도 자동으로 오래된 것만 걸러지고 매년 안 고쳐도 됨
+        const ENDED_CUTOFF_DAYS = 60;
+        const cutoffToday = new Date();
+        cutoffToday.setHours(0, 0, 0, 0);
+        const withStatus = withStatusRaw.filter(f => {
+            if (f.status.key !== 'ended') return true;
+            const end = parseIso(f.endDate) || parseIso(f.startDate);
+            if (!end) return true;
+            const daysSinceEnd = (cutoffToday - end) / 86400000;
+            return daysSinceEnd <= ENDED_CUTOFF_DAYS;
+        });
 
         const counts = withStatus.reduce((acc, f) => {
             acc[f.status.key] = (acc[f.status.key] || 0) + 1;
@@ -465,7 +429,6 @@ async function fetchFestivals() {
             if (!aStart && !bStart) return 0;
             if (!aStart) return 1;
             if (!bStart) return -1;
-            // 종료된 건 최근에 끝난 것부터(내림차순), 나머지는 임박한 순(오름차순)
             return a.status.key === 'ended' ? bStart - aStart : aStart - bStart;
         });
 
@@ -475,8 +438,6 @@ async function fetchFestivals() {
             renderPage();
             renderCalendar();
 
-            // 앱을 처음 켤 때는 창이 최대화되는 애니메이션이 아직 안 끝났을 수 있어서,
-            // 그 상태에서 카드 크기를 계산하면 틀어질 수 있음 - 잠시 후 한 번 더 정확하게 재계산
             setTimeout(() => adjustCardImageHeights('festival-grid'), 300);
         } else {
             throw new Error(errors.join('\n') || '조건에 맞는 축제/행사 데이터가 0개입니다.');
@@ -513,7 +474,6 @@ function renderPage() {
     renderPaginationControls(totalPages, 'pagination-controls', currentPage, (p) => { currentPage = p; renderPage(); });
 }
 
-// --- ⭐ ブックマーク画面 ---
 let bookmarkPage = 1;
 let bookmarkTagFilter = null;
 let bookmarkStatusFilter = null;
@@ -567,17 +527,12 @@ let currentPageItems = [];
 
 function renderFestivals(festivals, clearGrid = true, totalCount = 0, gridId = 'festival-grid', emptyMessage = '該当するイベントが見つかりませんでした。') {
     const grid = document.getElementById(gridId);
-    // 로딩 중엔 flex(중앙정렬)로 바꿔놨을 수 있어서, 실제 카드 그릴 땐 그리드로 되돌림
     grid.style.display = 'grid';
     grid.style.alignItems = '';
     grid.style.justifyContent = '';
     if (clearGrid) grid.innerHTML = '';
 
     currentPageItems = festivals;
-
-    // grid.insertAdjacentHTML('beforeend',
-    //     `<p style="grid-column: 1 / -1; font-size: 13px; color: #515154; margin: 0 0 10px 0;">総 ${totalCount}件</p>`
-    // );
 
     if (totalCount === 0) {
         grid.insertAdjacentHTML('beforeend',
@@ -604,7 +559,7 @@ function renderFestivals(festivals, clearGrid = true, totalCount = 0, gridId = '
         const bookmarkBtnHtml = `<button class="bookmark-btn ${isBookmarked ? 'active' : ''}" onclick="event.stopPropagation(); toggleBookmark('${fest.key}')">${ICON_BOOKMARK}</button>`;
 
         const cardHTML = `
-            <div class="card" onclick="showFestivalDetail(${idx})">
+            <div class="card ${fest.status?.key === 'ended' ? 'ended-card' : ''}" onclick="showFestivalDetail(${idx})">
                 ${badgeHtml}
                 ${bookmarkBtnHtml}
                 ${imageTag}
@@ -620,12 +575,7 @@ function renderFestivals(festivals, clearGrid = true, totalCount = 0, gridId = '
     adjustCardImageHeights(gridId);
 }
 
-// 카드 이미지 높이를 "실제로 남는 공간"에 딱 맞게 계산해서 정함
-// (예전엔 vh 비율로 대충 계산해서 검색바/태그필터/페이지네이션이 차지하는 공간을
-//  못 빼고 계산하는 바람에 스크롤이 생겼음 - 이번엔 실제 픽셀을 측정해서 정확하게 맞춤)
 function adjustCardImageHeights(gridId) {
-    // 모바일(768px 이하)은 style.css에서 카드 이미지 높이를 고정값(190px)으로 처리하고
-    // 페이지 자체가 자연스럽게 세로 스크롤되므로, "화면에 딱 맞추는" 이 계산 자체가 필요 없음
     if (window.innerWidth <= 768) return;
 
     const wrapId = gridId === 'bookmark-grid' ? 'bookmark-grid-wrap' : 'festival-grid-wrap';
@@ -638,16 +588,12 @@ function adjustCardImageHeights(gridId) {
 
     const cols = 3;
     const rows = Math.ceil(cards.length / cols);
-    const gap = 20; // style.css의 grid gap 값과 맞춰야 함
+    const gap = 20;
     const wrapHeight = wrap.clientHeight;
-    if (wrapHeight <= 0) return; // 아직 화면에 레이아웃 안 잡혔으면 건너뜀
+    if (wrapHeight <= 0) return;
 
-    // 1줄만 있어도(예: 북마크 3개 이하) "2줄 있다고 가정"하고 공간을 나눔 -
-    // 이러면 화면 크기에 따라 여전히 크기가 달라지긴 하는데, 1줄이 화면 세로 전체를
-    // 혼자 다 차지해서 비정상적으로 커지는 일은 없어짐 (최대 "2줄분의 절반"까지만 커짐)
     const effectiveRows = Math.max(rows, 2);
 
-    // 카드 하나에서 "이미지 빼고 나머지(제목/날짜/장소/태그 등)"가 차지하는 높이를 실측함
     const firstCard = cards[0];
     const firstThumb = firstCard.querySelector('.card-thumb');
     if (!firstThumb) return;
@@ -656,26 +602,22 @@ function adjustCardImageHeights(gridId) {
     const perRowHeight = (wrapHeight - gap * (effectiveRows - 1)) / effectiveRows;
     let idealThumbHeight = perRowHeight - chromeHeight;
 
-    // 너무 작아지거나(스크롤 없이 최소한의 사진 크기는 유지) 너무 커지지 않게 상하한선
     idealThumbHeight = Math.max(100, Math.min(280, idealThumbHeight));
 
     document.documentElement.style.setProperty('--card-thumb-height', `${Math.floor(idealThumbHeight)}px`);
 }
 
 window.addEventListener('resize', () => {
-    // 지금 홈/북마크 화면 중 뭐가 보이는지 확인해서, 그 그리드만 다시 계산
     if (document.getElementById('view-home').style.display !== 'none') adjustCardImageHeights('festival-grid');
     if (document.getElementById('view-bookmarks').style.display !== 'none') adjustCardImageHeights('bookmark-grid');
 });
 
-// --- 상세정보 화면 (별도 화면으로 전환) ---
 let currentDetailFest = null;
 let showingOriginalLang = false;
 
 function openDetailForFest(fest) {
     if (!fest) return;
 
-    // 뒤로가기 눌렀을 때 돌아갈 화면을 지금 보이는 화면으로 기억해둠
     const current = [...views].find(v => v.style.display !== 'none' && v.id !== 'view-detail');
     if (current) lastViewBeforeDetail = current.id;
 
@@ -705,7 +647,6 @@ function copyLinkToClipboard(url, btnEl) {
             btnEl.classList.remove('copied');
         }, 1200);
     }).catch(() => {
-        // 복사 실패해도 조용히 무시 (앱이 안 죽게)
     });
 }
 
@@ -713,11 +654,8 @@ function renderDetailContent() {
     const fest = currentDetailFest;
     if (!fest) return;
 
-    // orig(원문 한국어)가 있고 지금 원문 모드면, 번역 가능했던 필드만 원문 값으로 덮어씀
-    // (날짜/이미지/URL처럼 번역 대상이 아닌 값은 항상 fest 그대로)
     const d = (showingOriginalLang && fest.orig) ? { ...fest, ...fest.orig } : fest;
 
-    // 원문(한국어) 모드일 땐 라벨도 한국어로, 아니면 일본어로
     const L = showingOriginalLang
         ? { playTime: '시간', sponsor1: '주최', sponsor2: '주관', ageLimit: '관람가능연령', bookingPlace: '예약', useFee: '요금', discountInfo: '할인정보', spendTime: '관람소요시간', placeInfo: '위치안내', program: '프로그램', subEvent: '부대행사', noPlace: '장소미정', noDate: '일정미정', officialSite: '공식사이트를 보기 →' }
         : { playTime: '時間', sponsor1: '主催', sponsor2: '主管', ageLimit: '観覧可能年齢', bookingPlace: '予約', useFee: '料金', discountInfo: '割引情報', spendTime: '観覧所要時間', placeInfo: '位置案内', program: 'プログラム', subEvent: '付帯行事', noPlace: '場所未定', noDate: '日程未定', officialSite: '公式サイトを見る →' };
@@ -738,17 +676,11 @@ function renderDetailContent() {
         ? `<button id="detail-bookmark-btn" class="detail-bookmark-btn ${isBookmarked ? 'active' : ''}" data-key="${fest.key}" onclick="toggleBookmark('${fest.key}')">${ICON_BOOKMARK}<span class="bm-label">${isBookmarked ? 'ブックマーク済み' : 'ブックマークする'}</span></button>`
         : '';
 
-    // 진짜 원문이 있을 때만(내용이 있고, 지금 보이는 텍스트랑 실제로 다를 때만) 버튼을 보여줌.
-    // 예전 캐시처럼 orig 필드가 비어있는 경우엔 버튼 자체를 숨김 (눌러도 아무 변화 없는 상황 방지)
     const hasRealOrig = Boolean(fest.orig && fest.orig.title && fest.orig.title.trim() && fest.orig.title !== fest.title);
     const origToggleHtml = hasRealOrig
         ? `<button class="detail-orig-toggle-btn" onclick="toggleOriginalLanguage()">${showingOriginalLang ? '🇯🇵 日本語で見る' : '🇰🇷 原文（韓国語）を見る'}</button>`
         : '';
 
-    // 값이 있는 항목만 표로 보여줌 (빈 줄 안 생기게)
-    // ⚠️ 지도 이동 기능 - 오류(엉뚱한 주소 검색 등)가 많아서 임시로 꺼둠. 나중에 다시 켜려면
-    // 아래 두 줄 주석 풀고, addressRowHtml을 mapUrl 있는 버전으로 되돌리면 됨.
-    // const mapUrl = getMapUrl(fest);
     const mapUrl = '';
     const addressText = d.address || L.noPlace;
     const addressRowHtml = mapUrl
@@ -804,13 +736,8 @@ function showFestivalDetailByKey(key) {
     openDetailForFest(fest);
 }
 
-// --- 📅 달력 로직 (축제 날짜 표시 + 클릭 시 목록) ---
-let currentDate = new Date(); // 항상 "오늘" 기준으로 시작 (예전엔 2026년 7월로 고정되어 있었음)
+let currentDate = new Date();
 
-// 특정 날짜에 "진행 중인" 축제 전부 반환 (하루짜리든 여러날짜든 다 포함)
-// ⚠️ API 쪽 데이터 품질 문제로 가끔 "연중 상시"(1년 내내) 같은 이상한 기간이 들어올 때가 있어서,
-// 30일 넘게 계속되는 항목은 "특정 날짜 정보"로서 의미가 없다고 보고 캘린더에서는 제외함
-// (홈 화면 카드 목록에는 정상적으로 계속 보임, 캘린더 표시에서만 뺌)
 const CALENDAR_MAX_DURATION_DAYS = 30;
 
 function getEventsForDate(dateObj) {
@@ -828,8 +755,6 @@ function dateKeyOf(year, month, day) {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-// 캘린더 "?" 안내 아이콘 - 데스크톱은 마우스오버로 보이지만(CSS), 모바일은 오버가 없어서
-// 탭(클릭)해도 열리고, 바깥을 탭하면 닫히게 함
 const calInfoIcon = document.querySelector('.calendar-info-icon');
 calInfoIcon?.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -839,9 +764,6 @@ document.addEventListener('click', () => {
     document.querySelector('.calendar-info-tooltip')?.classList.remove('show');
 });
 
-// 화면 크기에 따라 캘린더 막대 배치 값을 다르게 씀
-// - 모바일은 칸(cell) 자체가 작아서 3줄을 다 넣으면 다음 주 칸까지 침범해서 날짜 숫자가 가려짐
-//   → 모바일은 최대 2줄까지만, 막대 높이/여백도 더 작게
 function getCalMetrics() {
     const isMobile = window.innerWidth <= 768;
     return isMobile
@@ -892,8 +814,6 @@ function renderCalendar() {
         `;
     }
 
-    // 이벤트 막대는 각 칸 "안"이 아니라, 달력 전체 위에 실제 픽셀 좌표를 계산해서 겹쳐 그림
-    // (같은 축제는 항상 같은 세로 위치를 유지해서 끊기지 않고 이어지게 하기 위함)
     renderEventOverlayBars(year, month, lastDay);
 }
 
@@ -905,8 +825,6 @@ function renderEventOverlayBars(year, month, lastDay) {
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month, lastDay);
 
-    // 이번 달에 걸쳐있는 축제만 추출하고, 이번 달 범위로 날짜를 잘라냄
-    // "북마크만 보기" 모드면 북마크한 축제만 대상으로 삼음 (경쟁이 줄어서 겹쳐도 다 보일 확률이 높아짐)
     const sourceList = calendarBookmarkOnly
         ? allFestivalsCache.filter(f => bookmarkedKeys.has(f.key))
         : allFestivalsCache;
@@ -925,10 +843,6 @@ function renderEventOverlayBars(year, month, lastDay) {
         };
     }).filter(Boolean);
 
-    // 겹치는 축제끼리 서로 다른 "레인(세로 줄)"에 배정 (구글 캘린더식 interval scheduling)
-    // ⚠️ 반드시 날짜순으로 처리해야 함 - 북마크를 먼저 배정하려고 순서를 바꾸면
-    // "늦게 시작하는 북마크 축제"가 앞쪽 날짜들의 레인까지 잘못 차지한 것처럼 계산되는 버그가 생김.
-    // 그래서 북마크 우선순위는 여기서 강제하지 않고, "★+N件" 힌트 + "북마크만 보기" 토글로 대신함.
     items.sort((a, b) => a.clipStart - b.clipStart || (b.clipEnd - b.clipStart) - (a.clipEnd - a.clipStart));
     const laneEndDates = [];
     items.forEach(it => {
@@ -938,8 +852,6 @@ function renderEventOverlayBars(year, month, lastDay) {
         laneEndDates[lane] = it.clipEnd;
     });
 
-    // 레인이 너무 많아지는 날은 막대 대신 "+N"으로만 표시
-    // 북마크 숨은 개수랑 나머지 숨은 개수를 따로 세서, "★+N件"이 둘을 헷갈리게 섞지 않게 함
     const overflowBookmarkCountByDay = {};
     const overflowOtherCountByDay = {};
     const segments = [];
@@ -959,7 +871,6 @@ function renderEventOverlayBars(year, month, lastDay) {
             return;
         }
 
-        // 주(일~토) 경계에서 끊어서 막대 세그먼트로 나눔
         let segStart = new Date(it.clipStart);
         while (segStart <= it.clipEnd) {
             const daysLeftInRow = 6 - segStart.getDay();
@@ -997,7 +908,7 @@ function renderEventOverlayBars(year, month, lastDay) {
         const isBookmarked = bookmarkedKeys.has(seg.fest.key);
 
         const bar = document.createElement('div');
-        bar.className = `calendar-event-bar ${seg.isTrueStart ? 'bar-start' : ''} ${seg.isTrueEnd ? 'bar-end' : ''} ${isBookmarked ? 'bookmarked' : ''}`;
+        bar.className = `calendar-event-bar lane-${seg.lane % 3} ${seg.isTrueStart ? 'bar-start' : ''} ${seg.isTrueEnd ? 'bar-end' : ''} ${isBookmarked ? 'bookmarked' : ''}`;
         bar.style.position = 'absolute';
         bar.style.left = `${startRect.left - bodyRect.left}px`;
         bar.style.width = `${endRect.right - startRect.left}px`;
@@ -1025,7 +936,6 @@ function renderEventOverlayBars(year, month, lastDay) {
         const bmCount = overflowBookmarkCountByDay[day] || 0;
         const otherCount = overflowOtherCountByDay[day] || 0;
 
-        // 북마크 숨은 개수(★N)랑 나머지 숨은 개수(+N)를 명확히 구분해서 표시
         let label = '';
         if (bmCount > 0 && otherCount > 0) label = `★${bmCount} +${otherCount}`;
         else if (bmCount > 0) label = `★${bmCount}件`;
@@ -1058,7 +968,6 @@ function showDayDetail(dateKey) {
     const m = dateKey.match(/(\d{4})-(\d{2})-(\d{2})/);
     const day = +m[3];
 
-    // 클릭한 날짜 칸에 선택 표시(테두리) - 어느 날짜를 봤는지 한눈에 보이게
     document.querySelectorAll('.calendar-cell.selected').forEach(c => c.classList.remove('selected'));
     const cell = document.querySelector(`.calendar-cell[data-day="${day}"]`);
     if (cell) cell.classList.add('selected');
@@ -1073,7 +982,6 @@ function showDayDetail(dateKey) {
         <div style="font-weight:700; margin-bottom:8px;">${dateKey} のイベント</div>
         ${events.map(f => `<div class="day-detail-item" onclick="showFestivalDetailByKey('${f.key}')">${bookmarkedKeys.has(f.key) ? ICON_STAR : ''}${f.title}</div>`).join('')}
     `;
-    // 리스트가 화면 아래로 잘려서 스크롤해야만 보이는 문제 방지 - 자동으로 스크롤해서 보여줌
     container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -1093,7 +1001,6 @@ window.addEventListener('resize', () => {
 });
 
 window.onload = async () => {
-    // 스플래시는 데이터 로딩과 무관하게, 최소 2.2초 보여준 뒤 서서히 사라짐
     setTimeout(() => {
         const splash = document.getElementById('splash-overlay');
         splash.classList.add('hide');

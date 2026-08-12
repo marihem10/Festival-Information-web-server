@@ -9,7 +9,6 @@
 body {
     margin: 0;
     display: flex;
-    /* 바다 느낌의 시원하고 은은한 그라데이션 배경 */
     background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
     font-family: 'Noto Sans JP', sans-serif;
     color: var(--text-main);
@@ -128,7 +127,6 @@ header h1 {
     align-items: start;
 }
 
-/* 유리 질감 카드 디자인 */
 .card {
     background: rgba(255, 255, 255, 0.45);
     backdrop-filter: blur(15px);
@@ -141,8 +139,6 @@ header h1 {
 
 .card-thumb {
     width: calc(100% + 32px);
-    /* renderer.js가 실제 남는 공간을 측정해서 이 변수를 정확히 계산해줌 (검색바/태그필터/
-       페이지네이션 높이까지 다 뺀 값이라 스크롤 없이 딱 맞음). 계산 전 기본값은 150px. */
     height: var(--card-thumb-height, 150px);
     object-fit: contain;
     background: rgba(0, 0, 0, 0.04);
@@ -170,8 +166,6 @@ header h1 {
     font-size: 16px;
     font-weight: 700;
     line-height: 1.35;
-    /* 제목이 1줄이든 2줄이든 항상 2줄 만큼 공간을 고정으로 차지하게 해서,
-       카드 높이가 제목 길이에 따라 들쭉날쭉해지지 않게 함 */
     height: 2.7em;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -190,7 +184,6 @@ header h1 {
     margin-top: 2px;
 }
 
-/* 캘린더 전용 CSS (지난번에 빼먹은 부분!) */
 .calendar-header {
     display: flex;
     justify-content: space-between;
@@ -350,7 +343,6 @@ header h1 {
     background: rgba(0, 122, 255, 0.08);
 }
 
-/*  축제 상세정보 화면 (모달 대신 별도 화면으로 전환) */
 .card {
     cursor: pointer;
     position: relative;
@@ -370,6 +362,16 @@ header h1 {
 .status-badge.ongoing { background: #ff9500; }
 .status-badge.upcoming { background: #34c759; }
 .status-badge.ended { background: rgba(60,60,67,0.7); }
+
+/* 👉 종료된 축제 카드는 카드 전체를 어둡게(살짝 흐리게+채도 낮춤) 만들어서,
+   "지금 안 열리는 축제"라는 게 글자를 안 읽어도 한눈에 보이게 함 */
+.card.ended-card {
+    opacity: 0.55;
+    filter: grayscale(35%);
+}
+.card.ended-card:hover {
+    opacity: 0.8;
+}
 
 #detail-back-btn {
     background: rgba(255, 255, 255, 0.6);
@@ -454,9 +456,9 @@ header h1 {
 }
 
 .detail-row {
-    display: grid;
-    grid-template-columns: 22px 1fr;
-    align-items: start;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 12px;
     font-size: 15px;
     color: #333;
@@ -465,11 +467,13 @@ header h1 {
 }
 
 .detail-row .label {
+    flex-shrink: 0;
     width: 22px;
 }
 
-.detail-row > span:not(.label) {
+.detail-row .label + span {
     min-width: 0;
+    flex: 1 1 auto;
 }
 
 .detail-map-btn {
@@ -532,7 +536,6 @@ header h1 {
     font-weight: 700;
 }
 
-/* --- 사이드바 접기/펴기 --- */
 .sidebar-top {
     display: flex;
     align-items: center;
@@ -599,7 +602,6 @@ header h1 {
     align-items: center;
 }
 
-/* --- 검색바 --- */
 .search-bar-wrap {
     flex: 0 0 auto;
     margin-bottom: 16px;
@@ -654,7 +656,6 @@ header h1 {
     color: var(--text-muted);
 }
 
-/* --- 탭필터 --- */
 .tag-filter-wrap {
     flex: 0 0 auto;
     display: flex;
@@ -663,7 +664,6 @@ header h1 {
     margin-bottom: 14px;
 }
 
-/* 카테고리 필터랑 開催中/開催予定 버튼을 한 줄에 - 왼쪽엔 카테고리, 오른쪽 끝엔 상태버튼 */
 .filter-row {
     display: flex;
     flex-wrap: wrap;
@@ -698,7 +698,6 @@ header h1 {
     border-color: var(--primary-blue);
 }
 
-/* 開催中/開催予定 토글 버튼 - 카드에 뜨는 .status-badge 색이랑 통일 */
 .status-filter-ongoing.active {
     background: #ff9500;
     color: white;
@@ -709,13 +708,10 @@ header h1 {
     color: white;
     border-color: #34c759;
 }
-/* 데스크톱은 넓어서 전체 글자(開催中/開催予定)를 그대로 보여줌 -
-   짧은 글자(동그라미 아이콘용)는 모바일에서만 @media 안에서 켜짐 */
 .status-label-short {
     display: none;
 }
 
-/* --- 북마크 --- */
 .bookmark-btn {
     position: absolute;
     top: 8px;
@@ -803,7 +799,6 @@ header h1 {
     padding-right: 18px;
 }
 
-/* --- 캘린더 일정 --- */
 .calendar-cell {
     position: relative;
     cursor: default;
@@ -838,6 +833,19 @@ header h1 {
 .calendar-event-bar.bar-end {
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
+}
+/* 👉 겹치는 축제를 레인(줄)별로 다른 색으로 구분 - 북마크는 항상 금색이 우선(더 아래 규칙이 덮어씀) */
+.calendar-event-bar.lane-0 {
+    background: linear-gradient(135deg, #5B7FB5, #34517F);
+    box-shadow: 0 1px 4px rgba(52, 81, 127, 0.4);
+}
+.calendar-event-bar.lane-1 {
+    background: linear-gradient(135deg, #6FBF9E, #2F7D63);
+    box-shadow: 0 1px 4px rgba(47, 125, 99, 0.4);
+}
+.calendar-event-bar.lane-2 {
+    background: linear-gradient(135deg, #C57FC2, #8A4A94);
+    box-shadow: 0 1px 4px rgba(138, 74, 148, 0.4);
 }
 .calendar-event-bar.bookmarked {
     background: linear-gradient(135deg, #E3A94A, #C9860B);
@@ -878,7 +886,6 @@ header h1 {
     color: var(--primary-blue);
 }
 
-/* --- 로딩 화면 --- */
 .loading-box {
     display: flex;
     flex-direction: column;
@@ -930,7 +937,6 @@ header h1 {
     margin: 10px 0 0 0;
 }
 
-/* --- 스플래시 화면 --- */
 #splash-overlay {
     position: fixed;
     inset: 0;
@@ -994,10 +1000,8 @@ header h1 {
 
 /* ============================================================
    📱 모바일(PWA) 대응 - 768px 이하일 때만 적용
-   데스크톱 스타일은 위에 그대로 두고, 여기서 필요한 부분만 덮어씀
    ============================================================ */
 
-/* 모바일 상단바 - 데스크톱에선 항상 숨김 */
 #mobile-topbar {
     display: none;
 }
@@ -1014,7 +1018,6 @@ header h1 {
         min-height: 100vh;
     }
 
-    /* --- 상단바 (로고 + 햄버거 버튼) --- */
     #mobile-topbar {
         display: flex;
         align-items: center;
@@ -1050,7 +1053,6 @@ header h1 {
         background: rgba(255, 255, 255, 0.9);
     }
 
-    /* --- 사이드바를 화면 왼쪽에서 슬라이드되는 오버레이 서랍으로 --- */
     #sidebar,
     #sidebar.collapsed {
         position: fixed;
@@ -1068,7 +1070,6 @@ header h1 {
     #sidebar.mobile-open {
         transform: translateX(0);
     }
-    /* 모바일 서랍에서는 데스크톱의 "접힌 아이콘만" 상태를 무시하고 항상 글자까지 다 보여줌 */
     #sidebar.collapsed .logo-text,
     #sidebar.collapsed .menu-text {
         display: inline;
@@ -1081,7 +1082,6 @@ header h1 {
         justify-content: flex-start;
         padding: 14px 20px;
     }
-    /* 데스크톱 전용 접기 버튼은 모바일에선 필요 없음(햄버거가 그 역할을 대신함) */
     #sidebar-toggle {
         display: none;
     }
@@ -1097,7 +1097,6 @@ header h1 {
         display: block;
     }
 
-    /* --- 메인 콘텐츠: 고정 높이/숨김스크롤 대신 자연스러운 페이지 스크롤로 --- */
     #content {
         padding: 16px;
         height: auto;
@@ -1125,29 +1124,24 @@ header h1 {
         margin-bottom: 14px;
     }
 
-    /* --- 카드 그리드: 3열 → 1열 --- */
     #festival-grid,
     #bookmark-grid {
         grid-template-columns: 1fr;
         gap: 16px;
     }
-    /* 모바일은 세로 스크롤이 자연스러워서, 데스크톱처럼 "화면에 딱 맞추는" 계산 대신 고정 높이 사용 */
     .card-thumb {
         height: 190px !important;
         width: calc(100% + 32px);
     }
 
-    /* --- 카드 디테일 다듬기 --- */
     .card {
         box-shadow: 0 6px 20px rgba(31, 38, 135, 0.10);
     }
     .card:hover {
-        /* 터치 화면은 탭한 뒤에도 :hover 상태가 계속 남아있는 경우가 있어서 무효화 */
         transform: none;
         background: rgba(255, 255, 255, 0.45);
     }
     .card:active {
-        /* 데스크톱의 마우스오버 대신, 눌렀을 때 살짝 눌리는 피드백 */
         transform: scale(0.98);
         background: rgba(255, 255, 255, 0.65);
     }
@@ -1163,8 +1157,6 @@ header h1 {
         font-size: 14.5px;
         height: 2.5em;
     }
-    /* 날짜/위치 줄은 renderer.js에서 인라인 style(font-size:12px)로 박혀 있어서
-       CSS로 덮어쓰려면 !important가 필요함 */
     .card p {
         font-size: 11px !important;
     }
@@ -1181,23 +1173,15 @@ header h1 {
         padding: 9px 36px 9px 14px;
     }
 
-    /* --- 터치 영역 확대 --- */
     .menu li {
         padding: 16px 20px;
         font-size: 15px;
     }
 
-    /* --- 필터 칩(카테고리/상태) 크기 축소 --- */
     .tag-chip {
         padding: 5px 12px;
         font-size: 11px;
     }
-    /* 데스크톱은 화면이 넓어서 카테고리랑 開催中/開催予定이 한 줄에 다 들어가는데,
-       모바일은 폭이 좁아서 다 들어가지 않음. 줄 전체를 스크롤시키면 開催予定이
-       화면 밖으로 밀려서 "잘린 것"처럼 보이고 스크롤 가능한지도 티가 안 나서 헷갈림.
-       그래서 카테고리 칩(개수가 늘어날 수 있는 쪽)만 스크롤되게 하고,
-       開催中/開催予定 버튼은 폭을 줄이지 않고(flex-shrink:0) 항상 오른쪽 끝에 고정해서
-       절대 화면 밖으로 잘리지 않게 함 */
     .filter-row {
         flex-wrap: nowrap;
         padding-right: 0;
@@ -1224,10 +1208,6 @@ header h1 {
     #bookmark-status-filter-wrap {
         flex: 0 0 auto;
     }
-    /* 開催中/開催予定을 글자 그대로 두면 자리를 너무 많이 차지해서,
-       모바일에서는 작은 색상 동그라미 아이콘(글자 한 자)으로 축소함.
-       비활성 상태는 테두리만 색깔, 눌러서 활성화되면 꽉 채운 색으로 바뀜
-       (카드에 뜨는 開催中/あとN日 뱃지 색이랑 동일한 색 규칙) */
     .status-label-full {
         display: none;
     }
@@ -1273,7 +1253,6 @@ header h1 {
         font-size: 13px !important;
     }
 
-    /* --- 캘린더: 7칸 유지하되 셀/글씨 크기를 폰 화면에 맞게 축소 --- */
     .calendar-header {
         padding: 10px 14px;
     }
@@ -1309,7 +1288,6 @@ header h1 {
         flex-wrap: wrap;
     }
 
-    /* --- 마우스오버 툴팁 → 탭 방식 --- */
     .calendar-info-tooltip {
         width: 220px;
     }
@@ -1317,7 +1295,6 @@ header h1 {
         display: block;
     }
 
-    /* --- 상세 화면은 이미 800px 기준 반응형이 잡혀있어서 자연스럽게 세로로 쌓임 --- */
     .detail-card {
         padding: 20px 18px;
     }
