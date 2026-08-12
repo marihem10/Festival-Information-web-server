@@ -1255,7 +1255,7 @@ let mtMap = null;
 let mapMarkers = [];
 
 // 👉 MapTiler 무료 API 키를 여기 넣어주세요 (https://cloud.maptiler.com/account/keys/ 에서 발급)
-const MAPTILER_API_KEY = 'YOUR_MAPTILER_API_KEY';
+const MAPTILER_API_KEY = 'pLCMDRRAKjsl0vNzevy6';
 
 function initMapIfNeeded() {
     if (mtMap) return;
