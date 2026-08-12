@@ -40,6 +40,7 @@ window.addEventListener('popstate', (e) => {
         if (view === 'view-home') renderPage();
         if (view === 'view-bookmarks') renderBookmarkPage();
         if (view === 'view-calendar') renderCalendar();
+        if (view === 'view-map') renderMapView();
     }
 
     isHandlingPopState = false;
@@ -55,6 +56,7 @@ tabs.forEach(tab => {
         if (target === 'view-home') renderPage();
         if (target === 'view-bookmarks') renderBookmarkPage();
         if (target === 'view-calendar') renderCalendar();
+        if (target === 'view-map') renderMapView();
     });
 });
 
@@ -1241,6 +1243,69 @@ window.addEventListener('resize', () => {
         renderCalendar();
     }
 });
+
+// --- 🗺️ 지도 화면 ---
+// 홈 화면에 지금 적용된 필터(지역/카테고리/상태/검색어)를 그대로 재사용함 -
+// 지도만의 별도 필터 UI는 안 만들고, "지금 홈에서 보고 있는 걸 지도로도 보기" 개념
+let leafletMap = null;
+let mapMarkers = [];
+
+function initMapIfNeeded() {
+    if (leafletMap) return;
+    // 부산+경남+울산이 대충 다 보이는 위치/줌으로 시작
+    leafletMap = L.map('map-container').setView([35.15, 128.55], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(leafletMap);
+}
+
+function renderMapView() {
+    initMapIfNeeded();
+    // 탭이 숨겨져 있다가 다시 보일 때 지도 크기 계산이 깨지는 경우가 있어서,
+    // 화면에 다시 보인 직후 한 번 더 크기를 재계산해줌
+    setTimeout(() => leafletMap.invalidateSize(), 50);
+
+    const list = getFilteredList(); // 홈 화면 필터를 그대로 재사용
+
+    mapMarkers.forEach(m => leafletMap.removeLayer(m));
+    mapMarkers = [];
+
+    let shownCount = 0;
+    let noCoordCount = 0;
+
+    list.forEach(fest => {
+        const lat = parseFloat(fest.lat);
+        const lng = parseFloat(fest.lng);
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+            noCoordCount += 1;
+            return;
+        }
+        shownCount += 1;
+
+        const isBookmarked = bookmarkedKeys.has(fest.key);
+        const dateStr = formatDateRange(fest) || '日程未定';
+        const badgeColor = fest.status?.key === 'ongoing' ? '#ff9500' : fest.status?.key === 'ended' ? 'rgba(60,60,67,0.7)' : '#34c759';
+        const popupHtml = `
+            <div style="min-width:180px;">
+                ${fest.status?.label ? `<span style="display:inline-block; background:${badgeColor}; color:white; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:6px;">${fest.status.label}</span>` : ''}
+                <div style="font-weight:700; font-size:13px; margin:4px 0;">${isBookmarked ? '★ ' : ''}${fest.title}</div>
+                <div style="font-size:12px; color:#515154; margin-bottom:8px;">${dateStr}</div>
+                <button onclick="showFestivalDetailByKey('${fest.key}')" style="font-size:12px; padding:5px 12px; border-radius:8px; border:none; background:#007AFF; color:white; cursor:pointer; font-family:'Noto Sans JP', sans-serif;">詳細を見る</button>
+            </div>
+        `;
+        const marker = L.marker([lat, lng]).addTo(leafletMap);
+        marker.bindPopup(popupHtml);
+        mapMarkers.push(marker);
+    });
+
+    const countText = document.getElementById('map-count-text');
+    if (countText) {
+        countText.textContent = noCoordCount > 0
+            ? `${shownCount}件を表示中（位置情報がない${noCoordCount}件は表示されません）`
+            : `${shownCount}件を表示中`;
+    }
+}
 
 window.onload = async () => {
     setTimeout(() => {

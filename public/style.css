@@ -184,6 +184,35 @@ header h1 {
     margin-top: 2px;
 }
 
+/* --- 🗺️ 지도 화면 --- */
+#view-map.view-section {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    overflow: hidden;
+}
+#map-legend {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(15px);
+}
+#map-container {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    border-radius: 0;
+}
+.leaflet-popup-content-wrapper {
+    border-radius: 14px;
+}
+.leaflet-popup-content {
+    font-family: 'Noto Sans JP', sans-serif;
+    margin: 12px 14px;
+}
+
 .calendar-header {
     display: flex;
     justify-content: space-between;
@@ -1164,6 +1193,10 @@ header h1 {
         height: auto;
         overflow: visible;
         padding-right: 0;
+    }
+    #view-map.view-section {
+        height: 70vh;
+        overflow: hidden;
     }
     #view-home.view-section,
     #view-bookmarks.view-section {
