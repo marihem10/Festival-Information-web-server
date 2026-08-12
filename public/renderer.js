@@ -132,7 +132,11 @@ function normalizeHubItem(item) {
         title: item.title || '',
         summary: item.outl || '',
         address: item.eventPlace || item.addr1 || '',
+        // 👉 대분류(行事/祭り/パフォーマンス)는 category, 세부분류(전통역사축제 등)는
+        // subCategory로 따로 보관 - 대분류 먼저 고르고 그 안에서 세부분류를 고르는
+        // 2단계 필터로 씀 (한 번에 세부분류 20개를 다 보여주면 너무 많아서)
         category: item.cat2Nm || item.cat1Nm || '',
+        subCategory: item.cat3Nm || '',
         image: item.firstImage || item.firstImage2 || '',
         homepage: extractUrl(item.hmpg),
         startDate: ymdToIso(item.eventStartDate),
@@ -158,6 +162,7 @@ function normalizeHubItem(item) {
             summary: item.orig_outl || '',
             address: item.orig_eventPlace || item.orig_addr1 || '',
             category: item.orig_cat2Nm || item.orig_cat1Nm || '',
+            subCategory: item.orig_cat3Nm || '',
             playTime: stripHtml(item.orig_playTime),
             program: stripHtml(item.orig_program),
             subEvent: stripHtml(item.orig_subEvent),
@@ -179,6 +184,7 @@ function normalizeSimpleItem(item) {
         summary: item.summary || '',
         address: item.place || item.address || '',
         category: item.category || '',
+        subCategory: '', // 직접추가 항목은 세부분류 개념이 없음 - 대분류에서만 뜸
         image: item.image || '',
         homepage: extractUrl(item.homepage),
         startDate: item.startDate || '',
@@ -299,6 +305,30 @@ function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
     });
 }
 
+// 👉 세부분류 칩 - 대분류를 하나 고른 상태일 때만 나타남. 그 대분류 안에 실제로 존재하는
+// 세부분류만 추려서 보여줌 (예: "祭り" 골랐으면 그 밑에 전통역사축제/생태자연축제 등만)
+function renderSubTagFilterChips(containerId, sourceList, broadFilter, activeSubFilter, onSelect) {
+    const container = document.getElementById(containerId);
+    if (!broadFilter) {
+        container.innerHTML = '';
+        return;
+    }
+    const relevant = sourceList.filter(f => f.category === broadFilter);
+    const subCategories = [...new Set(relevant.map(f => f.subCategory).filter(Boolean))];
+    if (subCategories.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    const chips = [{ label: 'すべて', val: '' }, ...subCategories.map(c => ({ label: c, val: c }))];
+    container.innerHTML = chips.map(c => {
+        const active = c.val === '' ? !activeSubFilter : activeSubFilter === c.val;
+        return `<span class="tag-chip sub-chip ${active ? 'active' : ''}" data-subcat="${c.val}">${c.label}</span>`;
+    }).join('');
+    container.querySelectorAll('.tag-chip').forEach(chip => {
+        chip.addEventListener('click', () => onSelect(chip.getAttribute('data-subcat') || null));
+    });
+}
+
 function renderStatusFilterButtons(containerId, activeFilter, onToggle) {
     const container = document.getElementById(containerId);
     const options = [
@@ -321,6 +351,7 @@ let allFestivalsCache = [];
 let currentPage = 1;
 let searchQuery = '';
 let homeTagFilter = null;
+let homeSubTagFilter = null;
 let homeStatusFilter = null;
 const PAGE_SIZE = 6;
 
@@ -328,6 +359,7 @@ function getFilteredList() {
     let list = allFestivalsCache;
     if (homeStatusFilter) list = list.filter(f => f.status.key === homeStatusFilter);
     if (homeTagFilter) list = list.filter(f => f.category === homeTagFilter);
+    if (homeSubTagFilter) list = list.filter(f => f.subCategory === homeSubTagFilter);
     if (searchQuery) {
         const q = normalizeForSearch(searchQuery);
         list = list.filter(f =>
@@ -468,6 +500,12 @@ function renderPage() {
     });
     renderTagFilterChips('tag-filter-wrap', allFestivalsCache, homeTagFilter, (cat) => {
         homeTagFilter = cat;
+        homeSubTagFilter = null; // 대분류가 바뀌면 세부분류 선택은 초기화
+        currentPage = 1;
+        renderPage();
+    });
+    renderSubTagFilterChips('sub-tag-filter-wrap', allFestivalsCache, homeTagFilter, homeSubTagFilter, (subcat) => {
+        homeSubTagFilter = subcat;
         currentPage = 1;
         renderPage();
     });
@@ -477,6 +515,7 @@ function renderPage() {
 let bookmarkPage = 1;
 let bookmarkTagFilter = null;
 let bookmarkStatusFilter = null;
+let bookmarkSubTagFilter = null;
 
 function getBookmarkedList() {
     return allFestivalsCache.filter(f => bookmarkedKeys.has(f.key));
@@ -486,6 +525,7 @@ function getFilteredBookmarkList() {
     let list = getBookmarkedList();
     if (bookmarkStatusFilter) list = list.filter(f => f.status.key === bookmarkStatusFilter);
     if (bookmarkTagFilter) list = list.filter(f => f.category === bookmarkTagFilter);
+    if (bookmarkSubTagFilter) list = list.filter(f => f.subCategory === bookmarkSubTagFilter);
     return list;
 }
 
@@ -504,6 +544,12 @@ function renderBookmarkPage() {
     });
     renderTagFilterChips('bookmark-tag-filter-wrap', getBookmarkedList(), bookmarkTagFilter, (cat) => {
         bookmarkTagFilter = cat;
+        bookmarkSubTagFilter = null;
+        bookmarkPage = 1;
+        renderBookmarkPage();
+    });
+    renderSubTagFilterChips('bookmark-sub-tag-filter-wrap', getBookmarkedList(), bookmarkTagFilter, bookmarkSubTagFilter, (subcat) => {
+        bookmarkSubTagFilter = subcat;
         bookmarkPage = 1;
         renderBookmarkPage();
     });

@@ -297,7 +297,7 @@ async function enrichWithDates(items, concurrency = 15) {
 
 // --- 번역 (main.js와 동일 - DeepL 우선, 한도초과/실패 시 구글로 자동 전환) ---
 const HUB_TRANSLATABLE_FIELDS = [
-  'title', 'outl', 'addr1', 'cat1Nm', 'cat2Nm', 'eventPlace', 'playTime', 'program', 'subEvent',
+  'title', 'outl', 'addr1', 'cat1Nm', 'cat2Nm', 'cat3Nm', 'eventPlace', 'playTime', 'program', 'subEvent',
   'sponsor1', 'sponsor2', 'ageLimit', 'bookingPlace', 'discountInfo', 'placeInfo', 'progressType', 'useFee'
 ];
 const SIMPLE_TRANSLATABLE_FIELDS = [

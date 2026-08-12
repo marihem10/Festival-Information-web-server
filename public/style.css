@@ -673,6 +673,22 @@ header h1 {
     margin-bottom: 14px;
     padding-right: 18px;
 }
+
+/* 👉 세부분류 줄 - 대분류 밑에 살짝 들여쓰고, 칩도 한 단계 작게 만들어서
+   "이건 위에서 고른 대분류의 하위 항목"이라는 게 시각적으로 느껴지게 함 */
+.sub-filter-row {
+    padding-left: 16px;
+    margin-top: -6px;
+}
+.sub-filter-row .tag-chip {
+    padding: 4px 12px;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.35);
+}
+.sub-filter-row .tag-chip.active {
+    background: var(--primary-blue);
+    opacity: 0.85;
+}
 .filter-row .tag-filter-wrap {
     margin-bottom: 0;
 }
@@ -1201,6 +1217,23 @@ header h1 {
     }
     #tag-filter-wrap .tag-chip,
     #bookmark-tag-filter-wrap .tag-chip {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    #sub-tag-filter-wrap,
+    #bookmark-sub-tag-filter-wrap {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-left: 8px;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    #sub-tag-filter-wrap::-webkit-scrollbar,
+    #bookmark-sub-tag-filter-wrap::-webkit-scrollbar {
+        display: none;
+    }
+    #sub-tag-filter-wrap .tag-chip,
+    #bookmark-sub-tag-filter-wrap .tag-chip {
         white-space: nowrap;
         flex-shrink: 0;
     }
