@@ -201,12 +201,33 @@ function deriveRegion(koreanText) {
     return '경남'; // 시군명이 주소에 명확히 안 보이는 경우의 대비책
 }
 
+// 👉 제목/주소 둘 다 지역명이 없을 때 마지막으로 쓰는 안전장치 - 좌표(위경도)가
+// 부산/울산의 대략적인 범위 안에 있는지로 판별함. 정확한 시군 경계선까지는 아니고
+// 대략적인 사각형 범위라 완벽하진 않지만, 텍스트로 아예 못 찾는 것보단 훨씬 나음.
+function deriveRegionByCoord(lat, lng) {
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+    if (lat >= 34.88 && lat <= 35.40 && lng >= 128.74 && lng <= 129.30) return '부산';
+    if (lat >= 35.30 && lat <= 35.68 && lng >= 129.17 && lng <= 129.55) return '울산';
+    return '경남'; // hub가 애초에 이 3개 지역만 가져오고 있어서, 둘 다 아니면 경남으로 간주
+}
+
 function normalizeHubItem(item) {
+    const lat = item.yCoord || '';
+    const lng = item.xCoord || '';
+    // 제목/주소로 판별 시도 → 실패(그 외 경남으로 떨어짐)하면 좌표로 한 번 더 확인
+    let regionKo = deriveRegion(`${item.orig_title || ''} ${item.orig_eventPlace || item.orig_addr1 || ''}`);
+    if (regionKo === '경남' && lat && lng) {
+        const coordRegion = deriveRegionByCoord(parseFloat(lat), parseFloat(lng));
+        if (coordRegion) {
+            console.log(`[진단-지역] "${item.title}" 제목/주소로 못 찾아서 좌표로 판별함 → ${coordRegion}`);
+            regionKo = coordRegion;
+        }
+    }
     return {
         title: item.title || '',
         summary: item.outl || '',
         address: item.eventPlace || item.addr1 || '',
-        region: REGION_JA[deriveRegion(`${item.orig_title || ''} ${item.orig_eventPlace || item.orig_addr1 || ''}`)],
+        region: REGION_JA[regionKo] || REGION_JA['경남'],
         // 👉 대분류(行事/祭り/パフォーマンス)는 category, 세부분류(전통역사축제 등)는
         // subCategory로 따로 보관 - 대분류 먼저 고르고 그 안에서 세부분류를 고르는
         // 2단계 필터로 씀 (한 번에 세부분류 20개를 다 보여주면 너무 많아서)
@@ -229,8 +250,9 @@ function normalizeHubItem(item) {
         progressType: stripHtml(item.progressType),
         spendTime: stripHtml(item.spendTime),
         useFee: stripHtml(item.useFee),
-        lat: item.lat || item.mapy || '',
-        lng: item.lng || item.mapx || '',
+        // 위/경도 좌표 - hub 원본 응답 확인 결과 xCoord(경도)/yCoord(위도)로 옴 (진단 로그로 확인함)
+        lat,
+        lng,
         reading: item.reading || '',
         orig: {
             title: item.orig_title || '',
