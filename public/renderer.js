@@ -215,7 +215,7 @@ function normalizeHubItem(item) {
     const lat = item.yCoord || '';
     const lng = item.xCoord || '';
     // 제목/주소로 판별 시도 → 실패(그 외 경남으로 떨어짐)하면 좌표로 한 번 더 확인
-    let regionKo = deriveRegion(`${item.orig_title || ''} ${item.orig_eventPlace || item.orig_addr1 || ''}`);
+    let regionKo = deriveRegion(`${item.orig_title || ''} ${item.orig_eventPlace || ''} ${item.orig_addr1 || ''}`);
     if (regionKo === '경남' && lat && lng) {
         const coordRegion = deriveRegionByCoord(parseFloat(lat), parseFloat(lng));
         if (coordRegion) {
