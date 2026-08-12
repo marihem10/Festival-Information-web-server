@@ -225,6 +225,16 @@ async function fetchHubEvents() {
     if (pageNo > 10) break;
   }
   const filtered = filterExcludedHubItems(allItems);
+  // 🔎 진단용: 페이지 제한(10장=1000건)에 걸려서 잘린 건지 확인 + 지역별 대략적인 개수 확인
+  console.log(`[server] hub 전체 ${filtered.length}건 받아옴 (${pageNo - 1}페이지 처리, 10페이지 제한 걸렸으면 더 있을 수 있음)`);
+  const regionCounts = { 부산: 0, 울산: 0, 경남등: 0 };
+  filtered.forEach((item) => {
+    const addr = item.eventPlace || item.addr1 || '';
+    if (addr.includes('울산')) regionCounts.울산 += 1;
+    else if (addr.includes('부산')) regionCounts.부산 += 1;
+    else regionCounts.경남등 += 1;
+  });
+  console.log('[server] 지역별 대략적인 개수(주소 텍스트 기준):', regionCounts);
   // 🔎 진단용: 좌표 필드가 실제로 어떤 이름으로 오는지 확인 (경로안내 기능 준비용)
   if (filtered[0]) {
     console.log('[server] hub 원본 항목 샘플(좌표 필드 확인용):', JSON.stringify(filtered[0], null, 2).slice(0, 1500));

@@ -536,7 +536,7 @@ async function fetchFestivals() {
         const merged = [...hub, ...extraItems]
             .filter((f, idx, arr) => arr.findIndex(x => looseKey(x.title) === looseKey(f.title)) === idx);
 
-        const rankOf = { ongoing: 0, upcoming: 1, ended: 2, unknown: 3 };
+        const rankOf = { ongoing: 0, upcoming: 1, unknown: 2, ended: 3 };
         const withStatusRaw = merged.map(f => ({ ...f, key: looseKey(f.title), status: getStatus(f) }));
 
         // 👉 종료된 지 너무 오래된 축제는 목록에서 아예 제외 (고객 피드백: "종료된 건 많이 볼 필요 없음")
@@ -780,7 +780,9 @@ function adjustCardImageHeights(gridId) {
     const perRowHeight = (wrapHeight - gap * (effectiveRows - 1)) / effectiveRows;
     let idealThumbHeight = perRowHeight - chromeHeight;
 
-    idealThumbHeight = Math.max(100, Math.min(280, idealThumbHeight));
+    // 예전엔 최소 100px을 억지로 유지했는데, 필터 줄이 여러 개 겹쳐서 뜨면 실제 남는 공간이
+    // 그보다 작아져서 스크롤이 생기는 원인이 됐음 - 최소값을 낮춰서 여유를 더 줌
+    idealThumbHeight = Math.max(60, Math.min(280, idealThumbHeight));
 
     document.documentElement.style.setProperty('--card-thumb-height', `${Math.floor(idealThumbHeight)}px`);
 }
