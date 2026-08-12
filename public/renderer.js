@@ -1249,52 +1249,46 @@ window.addEventListener('resize', () => {
 });
 
 // --- 🗺️ 지도 화면 ---
-// 홈 화면에 지금 적용된 필터(지역/카테고리/상태/검색어)를 그대로 재사용함 -
-// 지도만의 별도 필터 UI는 안 만들고, "지금 홈에서 보고 있는 걸 지도로도 보기" 개념
-let leafletMap = null;
+// Leaflet을 거치지 않고 MapTiler SDK를 직접 사용함 - 중간 다리 역할의 플러그인이
+// 계속 CDN 문제를 일으켜서, 더 직접적이고 확실한 이 방식으로 변경함
+let mtMap = null;
 let mapMarkers = [];
 
 // 👉 MapTiler 무료 API 키를 여기 넣어주세요 (https://cloud.maptiler.com/account/keys/ 에서 발급)
-const MAPTILER_API_KEY = 'pLCMDRRAKjsl0vNzevy6';
-
-// 👉 상태(開催中=주황/開催予定=초록)에 맞춰 핀 색을 다르게 만드는 함수 -
-// 카드/상세페이지에 뜨는 status-badge 색이랑 통일함
-function createColoredMarkerIcon(color) {
-    return L.divIcon({
-        className: 'custom-map-marker',
-        html: `<svg viewBox="0 0 24 24" width="30" height="30" fill="${color}" stroke="white" stroke-width="1.2"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.25 7 12 7.29 12.29a1 1 0 0 0 1.42 0C13 22 20 15.25 20 10c0-4.42-3.58-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>`,
-        iconSize: [30, 30],
-        iconAnchor: [15, 30], // 핀의 뾰족한 끝이 실제 좌표를 정확히 가리키게
-        popupAnchor: [0, -28]
-    });
-}
+const MAPTILER_API_KEY = 'YOUR_MAPTILER_API_KEY';
 
 function initMapIfNeeded() {
-    if (leafletMap) return;
-    // 부산+경남+울산이 대충 다 보이는 위치/줌으로 시작
-    leafletMap = L.map('map-container').setView([35.15, 128.55], 9);
-    L.maptiler.maptilerLayer({
-        apiKey: MAPTILER_API_KEY,
-        language: L.MaptilerLanguage.JAPANESE // 지도 자체(도로명/지명)도 일본어로 표시
-    }).addTo(leafletMap);
+    if (mtMap) return;
+    maptilersdk.config.apiKey = MAPTILER_API_KEY;
+    mtMap = new maptilersdk.Map({
+        container: 'map-container',
+        style: maptilersdk.MapStyle.STREETS,
+        center: [128.55, 35.15], // MapTiler는 [경도, 위도] 순서 (Leaflet이랑 반대라 주의)
+        zoom: 9,
+        language: maptilersdk.Language.JAPANESE // 도로명/지명도 일본어로 표시
+    });
 }
 
 function renderMapView() {
     initMapIfNeeded();
     // 탭이 숨겨져 있다가 다시 보일 때 지도 크기 계산이 깨지는 경우가 있어서,
     // 화면에 다시 보인 직후 한 번 더 크기를 재계산해줌
-    setTimeout(() => leafletMap.invalidateSize(), 50);
+    setTimeout(() => mtMap.resize(), 50);
 
     // 홈 화면 필터랑 별개로 독립적으로 동작 - 지도는 항상 "지금 갈 만한 곳 전체"를 보여줌
     // (홈에서 뭘 필터링해놨든 지도엔 영향 안 줌). 종료된 축제만 항상 제외함.
     const list = allFestivalsCache.filter(f => f.status.key !== 'ended');
 
-    mapMarkers.forEach(m => leafletMap.removeLayer(m));
+    mapMarkers.forEach(m => m.remove());
     mapMarkers = [];
 
     let shownCount = 0;
     let noCoordCount = 0;
 
+    // 👉 좌표가 완전히 똑같은 축제들은 한 좌표 위에 겹쳐서 아래 마커가 클릭이 안 되는
+    // 문제가 있었음 - 그래서 좌표별로 먼저 묶고, 마커 하나당 그 자리의 축제를 전부
+    // 목록으로 보여주는 방식으로 바꿈 (하나짜리면 기존이랑 똑같이 보임)
+    const byCoord = {};
     list.forEach(fest => {
         const lat = parseFloat(fest.lat);
         const lng = parseFloat(fest.lng);
@@ -1303,21 +1297,19 @@ function renderMapView() {
             return;
         }
         shownCount += 1;
+        const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+        if (!byCoord[key]) byCoord[key] = { lat, lng, fests: [] };
+        byCoord[key].fests.push(fest);
+    });
 
-        const isBookmarked = bookmarkedKeys.has(fest.key);
-        const dateStr = formatDateRange(fest) || '日程未定';
-        const badgeColor = fest.status?.key === 'ongoing' ? '#ff9500' : fest.status?.key === 'ended' ? 'rgba(60,60,67,0.7)' : '#34c759';
-        const popupHtml = `
-            <div style="min-width:180px;">
-                ${fest.status?.label ? `<span style="display:inline-block; background:${badgeColor}; color:white; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:6px;">${fest.status.label}</span>` : ''}
-                <div style="font-weight:700; font-size:13px; margin:4px 0;">${isBookmarked ? '★ ' : ''}${fest.title}</div>
-                <div style="font-size:12px; color:#515154; margin-bottom:8px;">${dateStr}</div>
-                <button onclick="showFestivalDetailByKey('${fest.key}')" style="font-size:12px; padding:5px 12px; border-radius:8px; border:none; background:#007AFF; color:white; cursor:pointer; font-family:'Noto Sans JP', sans-serif;">詳細を見る</button>
-            </div>
-        `;
-        const pinColor = fest.status?.key === 'ongoing' ? '#ff9500' : fest.status?.key === 'upcoming' ? '#34c759' : '#8a8a8e';
-        const marker = L.marker([lat, lng], { icon: createColoredMarkerIcon(pinColor) }).addTo(leafletMap);
-        marker.bindPopup(popupHtml);
+    Object.values(byCoord).forEach(group => {
+        const hasOngoing = group.fests.some(f => f.status?.key === 'ongoing');
+        const pinColor = hasOngoing ? '#ff9500' : '#34c759';
+        const popupHtml = group.fests.length === 1 ? buildMapPopupSingle(group.fests[0]) : buildMapPopupGroup(group.fests);
+        const marker = new maptilersdk.Marker({ color: pinColor })
+            .setLngLat([group.lng, group.lat])
+            .setPopup(new maptilersdk.Popup({ offset: 25 }).setHTML(popupHtml))
+            .addTo(mtMap);
         mapMarkers.push(marker);
     });
 
@@ -1327,6 +1319,41 @@ function renderMapView() {
             ? `${shownCount}件を表示中（位置情報がない${noCoordCount}件は表示されません）`
             : `${shownCount}件を表示中`;
     }
+}
+
+function buildMapPopupSingle(fest) {
+    const isBookmarked = bookmarkedKeys.has(fest.key);
+    const dateStr = formatDateRange(fest) || '日程未定';
+    const badgeColor = fest.status?.key === 'ongoing' ? '#ff9500' : fest.status?.key === 'ended' ? 'rgba(60,60,67,0.7)' : '#34c759';
+    return `
+        <div style="min-width:180px;">
+            ${fest.status?.label ? `<span style="display:inline-block; background:${badgeColor}; color:white; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; margin-bottom:6px;">${fest.status.label}</span>` : ''}
+            <div style="font-weight:700; font-size:13px; margin:4px 0;">${isBookmarked ? '★ ' : ''}${fest.title}</div>
+            <div style="font-size:12px; color:#515154; margin-bottom:8px;">${dateStr}</div>
+            <button onclick="showFestivalDetailByKey('${fest.key}')" style="font-size:12px; padding:5px 12px; border-radius:8px; border:none; background:#007AFF; color:white; cursor:pointer; font-family:'Noto Sans JP', sans-serif;">詳細を見る</button>
+        </div>
+    `;
+}
+
+// 같은 좌표에 축제가 여러 개 있을 때 - 목록으로 쭉 보여주고 각각 상세보기 버튼을 둠
+function buildMapPopupGroup(fests) {
+    const items = fests.map(fest => {
+        const isBookmarked = bookmarkedKeys.has(fest.key);
+        const dateStr = formatDateRange(fest) || '日程未定';
+        return `
+            <div style="padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.08);">
+                <div style="font-weight:700; font-size:12px;">${isBookmarked ? '★ ' : ''}${fest.title}</div>
+                <div style="font-size:11px; color:#515154; margin:2px 0 6px;">${dateStr}</div>
+                <button onclick="showFestivalDetailByKey('${fest.key}')" style="font-size:11px; padding:4px 10px; border-radius:8px; border:none; background:#007AFF; color:white; cursor:pointer; font-family:'Noto Sans JP', sans-serif;">詳細を見る</button>
+            </div>
+        `;
+    }).join('');
+    return `
+        <div style="min-width:200px; max-height:260px; overflow-y:auto;">
+            <div style="font-weight:700; font-size:12px; color:#515154; margin-bottom:6px;">この場所で${fests.length}件開催中</div>
+            ${items}
+        </div>
+    `;
 }
 
 window.onload = async () => {
