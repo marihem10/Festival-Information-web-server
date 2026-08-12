@@ -754,6 +754,19 @@ header h1 {
     color: white;
     border-color: #0d8a8a;
 }
+/* 👉 지역 상세 칩(창원/김해 등)도 지역 버튼이랑 같은 청록색 계열로 통일
+   (.sub-filter-row .tag-chip 규칙이 파란색을 지정해두고 있어서, 그것보다
+   구체적인 선택자로 덮어써야 함) */
+.sub-filter-row .region-sub-chip {
+    color: #0d8a8a;
+    border-color: rgba(13, 138, 138, 0.25);
+    background: rgba(13, 138, 138, 0.06);
+}
+.sub-filter-row .region-sub-chip.active {
+    background: #0d8a8a;
+    color: white;
+    font-weight: 700;
+}
 .status-label-short {
     display: none;
 }

@@ -172,12 +172,33 @@ const SUBCATEGORY_JA = {
 
 // 👉 지역(부산/경남/울산) 판별 - hub 응답 자체엔 이 항목이 명확히 안 들어있어서,
 // 원문(한국어) 주소 텍스트에 어떤 지명이 포함되어 있는지로 판단함
-const REGION_ORDER = ['부산', '경남', '울산'];
-const REGION_JA = { '부산': '釜山', '경남': '慶尚南道', '울산': '蔚山' };
+// 👉 부산/울산은 그대로 두고, "경남"으로 뭉뚱그려지던 걸 실제 시군 단위로 세분화함.
+// 경상남도의 18개 시/군을 다 사전에 넣어두고, 그 중 실제로 축제가 있는 곳만 자동으로
+// 필터에 나타남(renderRegionDetailChips가 present인 것만 걸러서 보여줌).
+const REGION_ORDER = [
+    '부산', '울산',
+    '창원', '진주', '통영', '사천', '김해', '밀양', '거제', '양산',
+    '의령', '함안', '창녕', '고성', '남해', '하동', '산청', '함양', '거창', '합천',
+    '경남'
+];
+const REGION_JA = {
+    '부산': '釜山', '울산': '蔚山',
+    '창원': '昌原', '진주': '晋州', '통영': '統営', '사천': '泗川',
+    '김해': '金海', '밀양': '密陽', '거제': '巨済', '양산': '梁山',
+    '의령': '宜寧', '함안': '咸安', '창녕': '昌寧', '고성': '固城',
+    '남해': '南海', '하동': '河東', '산청': '山淸', '함양': '咸陽',
+    '거창': '居昌', '합천': '陜川', '경남': 'その他慶尚南道'
+};
+// 시군 이름을 먼저 다 확인해보고, 매칭 안 되면 "경남"(그 외 경상남도 지역)으로 처리
+const GYEONGNAM_CITIES = REGION_ORDER.filter(r => r !== '부산' && r !== '울산');
 function deriveRegion(koreanText) {
-    if (koreanText && koreanText.includes('울산')) return '울산';
-    if (koreanText && koreanText.includes('부산')) return '부산';
-    return '경남';
+    if (!koreanText) return '경남';
+    if (koreanText.includes('울산')) return '울산';
+    if (koreanText.includes('부산')) return '부산';
+    for (const city of GYEONGNAM_CITIES) {
+        if (koreanText.includes(city)) return city;
+    }
+    return '경남'; // 시군명이 주소에 명확히 안 보이는 경우의 대비책
 }
 
 function normalizeHubItem(item) {
@@ -422,7 +443,7 @@ function renderRegionDetailChips(containerId, sourceList, activeFilter, isOpen, 
     }
     container.innerHTML = regions.map(r => {
         const active = activeFilter === r;
-        return `<span class="tag-chip sub-chip ${active ? 'active' : ''}" data-region="${r}">${r}</span>`;
+        return `<span class="tag-chip region-sub-chip ${active ? 'active' : ''}" data-region="${r}">${r}</span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
         chip.addEventListener('click', () => {
