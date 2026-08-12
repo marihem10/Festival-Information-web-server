@@ -457,7 +457,7 @@ header h1 {
 
 .detail-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 12px;
     font-size: 15px;
