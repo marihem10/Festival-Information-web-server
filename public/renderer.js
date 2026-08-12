@@ -911,7 +911,15 @@ function showFestivalDetail(idx) {
 
 function toggleOriginalLanguage() {
     showingOriginalLang = !showingOriginalLang;
+    // renderDetailContent가 detail-content 전체를 다시 그리면서 지도 컨테이너도
+    // 새로 갈아치우는데, 그 전에 기존 지도를 먼저 정리 안 하면 에러가 남
+    if (detailMiniMap) {
+        detailMiniMap.remove();
+        detailMiniMap = null;
+    }
     renderDetailContent();
+    // 다시 그려진 새 컨테이너에 지도를 새로 초기화
+    setTimeout(() => initDetailMap(currentDetailFest), 50);
 }
 
 function copyLinkToClipboard(url, btnEl) {
@@ -1299,8 +1307,8 @@ function initMapIfNeeded() {
     mtMap = new maptilersdk.Map({
         container: 'map-container',
         style: maptilersdk.MapStyle.STREETS,
-        center: [128.55, 35.15], // MapTiler는 [경도, 위도] 순서 (Leaflet이랑 반대라 주의)
-        zoom: 9,
+        center: [128.7, 35.4], // MapTiler는 [경도, 위도] 순서 (Leaflet이랑 반대라 주의)
+        zoom: 7.5, // 부산+경남+울산 전체가 넓게 보이게 (9는 거제 부근만 확대되어 보였음)
         language: maptilersdk.Language.JAPANESE // 도로명/지명도 일본어로 표시
     });
 }

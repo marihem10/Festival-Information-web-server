@@ -1201,7 +1201,7 @@ header h1 {
         padding-right: 0;
     }
     #view-map.view-section {
-        height: 70vh;
+        height: calc(100vh - 140px); /* 상단바+여백을 뺀 실제 남는 공간에 맞춤 (70vh는 너무 작았음) */
         overflow: hidden;
     }
     #view-home.view-section,
