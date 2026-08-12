@@ -594,6 +594,17 @@ async function fetchFestivals() {
         if (withStatus.length > 0) {
             allFestivalsCache = withStatus;
             currentPage = 1;
+
+            // 🔎 진단용: 지역 필터가 이상하게 동작하는 원인을 찾기 위해, 각 축제의
+            // 판별용 원문 주소랑 최종적으로 계산된 지역값을 콘솔에 다 찍어봄
+            console.log('[진단-지역] 축제별 지역 판별 결과:');
+            withStatus.forEach(f => {
+                console.log(`  "${f.title}" → region="${f.region}"`);
+            });
+            const regionTally = {};
+            withStatus.forEach(f => { regionTally[f.region] = (regionTally[f.region] || 0) + 1; });
+            console.log('[진단-지역] 지역별 집계:', regionTally);
+
             renderPage();
             renderCalendar();
 
