@@ -211,7 +211,7 @@ async function fetchHubEvents() {
   while (true) {
     const payload = {
       type: 'cat', lang: 'KOR', cat1: ['EV'], cat2: ['EV01', 'EV02', 'EV03'], cat3: [],
-      areaCd: ['26', '48'], arrange: 'NEW', awardYear: [], fromDetail: false, langDiv: 'KOR',
+      areaCd: ['26', '48', '31'], arrange: 'NEW', awardYear: [], fromDetail: false, langDiv: 'KOR',
       mainYn: 'N', nuri: [], pageCnt: 1, pageNo, photo1: [], photo2: [],
       searchCnt: PAGE_SIZE, searchStart: (pageNo - 1) * PAGE_SIZE, sigunguCd: [], title: ''
     };
