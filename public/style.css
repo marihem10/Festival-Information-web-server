@@ -667,11 +667,16 @@ header h1 {
 .filter-row {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: 8px;
     margin-bottom: 14px;
     padding-right: 18px;
+}
+/* 開催状況만 오른쪽 끝으로 - 나머지(지역/카테고리)는 왼쪽부터 자연스럽게 쌓임 */
+#status-filter-wrap,
+#bookmark-status-filter-wrap {
+    margin-left: auto;
 }
 
 /* 👉 세부분류 줄 - 대분류 밑에 살짝 들여쓰고, 칩도 한 단계 작게 만들어서

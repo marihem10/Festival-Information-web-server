@@ -399,8 +399,20 @@ function renderSubTagFilterChips(containerId, sourceList, broadFilter, activeSub
 }
 
 // 👉 지역(釜山/慶尚南道/蔚山) 필터 칩 - 카테고리/상태 필터랑 같은 줄에, 토글 방식으로
-function renderRegionFilterChips(containerId, sourceList, activeFilter, onSelect) {
+// 👉 地域 버튼 하나만 메인 줄에 두고, 누르면 그 밑에 실제 지역 선택지가 펼쳐지는 방식
+function renderRegionToggleButton(containerId, activeFilter, isOpen, onToggle) {
     const container = document.getElementById(containerId);
+    const label = activeFilter || '地域';
+    container.innerHTML = `<span class="tag-chip region-chip ${activeFilter ? 'active' : ''}">${label} ${isOpen ? '▲' : '▼'}</span>`;
+    container.querySelector('.tag-chip').addEventListener('click', onToggle);
+}
+
+function renderRegionDetailChips(containerId, sourceList, activeFilter, isOpen, onSelect) {
+    const container = document.getElementById(containerId);
+    if (!isOpen) {
+        container.innerHTML = '';
+        return;
+    }
     const present = new Set(sourceList.map(f => f.region).filter(Boolean));
     const orderedJa = REGION_ORDER.map(ko => REGION_JA[ko]);
     const regions = orderedJa.filter(r => present.has(r));
@@ -410,7 +422,7 @@ function renderRegionFilterChips(containerId, sourceList, activeFilter, onSelect
     }
     container.innerHTML = regions.map(r => {
         const active = activeFilter === r;
-        return `<span class="tag-chip region-chip ${active ? 'active' : ''}" data-region="${r}">${r}</span>`;
+        return `<span class="tag-chip sub-chip ${active ? 'active' : ''}" data-region="${r}">${r}</span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -445,6 +457,7 @@ let homeTagFilter = null;
 let homeSubTagFilter = null;
 let homeStatusFilter = null;
 let homeRegionFilter = null;
+let homeRegionPanelOpen = false;
 const PAGE_SIZE = 6;
 
 function getFilteredList() {
@@ -588,8 +601,13 @@ function renderPage() {
     // ⚠️ 순서 중요: 필터 칩들(특히 세부분류 줄)을 먼저 그려서 화면 높이가 확정된 다음에
     // renderFestivals를 불러야 함 - renderFestivals 안에서 카드 높이를 계산하는데,
     // 그걸 먼저 하면 세부분류 줄이 나타나기/사라지기 전 높이로 잘못 계산해서 스크롤이 생김
-    renderRegionFilterChips('region-filter-wrap', allFestivalsCache, homeRegionFilter, (region) => {
+    renderRegionToggleButton('region-filter-wrap', homeRegionFilter, homeRegionPanelOpen, () => {
+        homeRegionPanelOpen = !homeRegionPanelOpen;
+        renderPage();
+    });
+    renderRegionDetailChips('region-detail-wrap', allFestivalsCache, homeRegionFilter, homeRegionPanelOpen, (region) => {
         homeRegionFilter = region;
+        homeRegionPanelOpen = false; // 고르면 자동으로 접힘
         currentPage = 1;
         renderPage();
     });
@@ -610,6 +628,8 @@ function renderPage() {
         renderPage();
     });
     renderFestivals(pageItems, true, filtered.length, 'festival-grid', '該当するイベントが見つかりませんでした。');
+    // 혹시 폰트/이미지 로딩 등으로 뒤늦게 레이아웃이 살짝 바뀌는 경우를 대비한 안전장치 - 잠시 후 한 번 더 재계산
+    setTimeout(() => adjustCardImageHeights('festival-grid'), 50);
     renderPaginationControls(totalPages, 'pagination-controls', currentPage, (p) => { currentPage = p; renderPage(); });
 }
 
@@ -618,6 +638,7 @@ let bookmarkTagFilter = null;
 let bookmarkStatusFilter = null;
 let bookmarkSubTagFilter = null;
 let bookmarkRegionFilter = null;
+let bookmarkRegionPanelOpen = false;
 
 function getBookmarkedList() {
     return allFestivalsCache.filter(f => bookmarkedKeys.has(f.key));
@@ -639,8 +660,13 @@ function renderBookmarkPage() {
     const start = (bookmarkPage - 1) * PAGE_SIZE;
     const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
-    renderRegionFilterChips('bookmark-region-filter-wrap', getBookmarkedList(), bookmarkRegionFilter, (region) => {
+    renderRegionToggleButton('bookmark-region-filter-wrap', bookmarkRegionFilter, bookmarkRegionPanelOpen, () => {
+        bookmarkRegionPanelOpen = !bookmarkRegionPanelOpen;
+        renderBookmarkPage();
+    });
+    renderRegionDetailChips('bookmark-region-detail-wrap', getBookmarkedList(), bookmarkRegionFilter, bookmarkRegionPanelOpen, (region) => {
         bookmarkRegionFilter = region;
+        bookmarkRegionPanelOpen = false;
         bookmarkPage = 1;
         renderBookmarkPage();
     });
@@ -661,6 +687,7 @@ function renderBookmarkPage() {
         renderBookmarkPage();
     });
     renderFestivals(pageItems, true, filtered.length, 'bookmark-grid', 'まだブックマークしたイベントがありません。');
+    setTimeout(() => adjustCardImageHeights('bookmark-grid'), 50);
     renderPaginationControls(totalPages, 'bookmark-pagination-controls', bookmarkPage, (p) => { bookmarkPage = p; renderBookmarkPage(); });
 }
 
