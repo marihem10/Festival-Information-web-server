@@ -2,6 +2,11 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0056b3">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo.png">
     <title>釜山フェスナビ</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -9,8 +14,17 @@
     <div id="splash-overlay">
         <img src="logo.png" class="splash-logo" alt="">
         <div class="splash-title">釜山フェスナビ</div>
+        <div class="splash-sub"></div>
         <div class="splash-dots"><span></span><span></span><span></span></div>
     </div>
+
+    <header id="mobile-topbar">
+        <h2 class="logo"><span class="logo-text">釜山フェスナビ</span></h2>
+        <button id="mobile-menu-toggle" title="メニューを開く">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        </button>
+    </header>
+    <div id="sidebar-backdrop"></div>
 
     <nav id="sidebar">
         <div class="sidebar-top">
@@ -108,7 +122,7 @@
         </div>
     </main>
 
-    <script src="renderer.js"></script>
     <script src="web-api.js"></script>
+    <script src="renderer.js"></script>
 </body>
 </html>
