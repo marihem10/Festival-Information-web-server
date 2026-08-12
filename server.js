@@ -67,8 +67,19 @@ async function readFirestoreCache(docId, ttlMs, ignoreTTL = false) {
   }
   return null;
 }
+// 🧪 로컬에서 테스트용 코드 변경(예: 지역 확장 실험)을 돌릴 때, 그 결과가 실수로
+// Firestore 캐시에 저장돼서 Render(실제 서비스)에 새어나가는 걸 원천 차단하는 안전장치.
+// .env에 SKIP_FIRESTORE_CACHE_WRITE=true 를 넣으면 로컬 파일엔 그대로 저장되지만
+// Firestore에는 안 써짐 - 테스트 끝나고 지우는 걸 깜빡해도 안전함.
+// Render 배포본의 .env(Environment 탭)에는 이 값을 절대 넣지 않아야 정상 캐시 저장됨.
+const SKIP_FIRESTORE_CACHE_WRITE = process.env.SKIP_FIRESTORE_CACHE_WRITE === 'true';
+
 async function writeFirestoreCache(docId, items) {
   if (!firestoreDb) return;
+  if (SKIP_FIRESTORE_CACHE_WRITE) {
+    console.log(`[server] SKIP_FIRESTORE_CACHE_WRITE=true - Firestore 캐시(${docId}) 저장 건너뜀(로컬 테스트 모드)`);
+    return;
+  }
   try {
     await firestoreDb.collection('server_cache').doc(docId).set({
       schemaVersion: CACHE_SCHEMA_VERSION,
@@ -200,7 +211,7 @@ async function fetchHubEvents() {
   while (true) {
     const payload = {
       type: 'cat', lang: 'KOR', cat1: ['EV'], cat2: ['EV01', 'EV02', 'EV03'], cat3: [],
-      areaCd: ['26'], arrange: 'NEW', awardYear: [], fromDetail: false, langDiv: 'KOR',
+      areaCd: ['26', '48'], arrange: 'NEW', awardYear: [], fromDetail: false, langDiv: 'KOR',
       mainYn: 'N', nuri: [], pageCnt: 1, pageNo, photo1: [], photo2: [],
       searchCnt: PAGE_SIZE, searchStart: (pageNo - 1) * PAGE_SIZE, sigunguCd: [], title: ''
     };
@@ -255,7 +266,7 @@ async function fetchDetailIntro(contentId) {
   }
 }
 
-async function enrichWithDates(items, concurrency = 3) { // ⚠️ 진단용으로 15→3 낮춤. 문제 없으면 다시 15로 되돌려도 됨
+async function enrichWithDates(items, concurrency = 15) {
   const queue = [...items];
   const results = [];
   async function worker() {
