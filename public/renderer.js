@@ -1273,13 +1273,9 @@ function initMapIfNeeded() {
     if (leafletMap) return;
     // 부산+경남+울산이 대충 다 보이는 위치/줌으로 시작
     leafletMap = L.map('map-container').setView([35.15, 128.55], 9);
-    L.tileLayer(`https://api.maptiler.com/maps/streets-v4/{z}/{x}/{y}.png?key=${MAPTILER_API_KEY}`, {
-        tileSize: 512,
-        zoomOffset: -1,
-        minZoom: 1,
-        maxZoom: 19,
-        crossOrigin: true,
-        attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>'
+    L.maptiler.maptilerLayer({
+        apiKey: MAPTILER_API_KEY,
+        language: L.MaptilerLanguage.JAPANESE // 지도 자체(도로명/지명)도 일본어로 표시
     }).addTo(leafletMap);
 }
 
