@@ -1374,7 +1374,7 @@ function initMapIfNeeded() {
     mtMap.on('zoom', updateMarkerLabelVisibility);
 }
 
-const MAP_LABEL_ZOOM_THRESHOLD = 11; // 이 줌 레벨 이상일 때만 이름표(텍스트) 표시
+const MAP_LABEL_ZOOM_THRESHOLD = 9.5; // 이 줌 레벨 이상일 때만 이름표(텍스트) 표시 (11→9.5로 낮춤, 폰에서 너무 많이 확대해야 보이던 문제)
 
 // 지금 줌 레벨에 맞춰 모든 마커의 이름표를 보이거나 숨김
 function updateMarkerLabelVisibility() {
