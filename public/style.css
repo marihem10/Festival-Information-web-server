@@ -1359,7 +1359,8 @@ header h1 {
         padding-right: 0;
     }
     #tag-filter-wrap,
-    #bookmark-tag-filter-wrap {
+    #bookmark-tag-filter-wrap,
+    #calendar-tag-filter-wrap {
         flex: 1 1 auto;
         min-width: 0;
         overflow-x: auto;
@@ -1368,16 +1369,19 @@ header h1 {
         scrollbar-width: none;
     }
     #tag-filter-wrap::-webkit-scrollbar,
-    #bookmark-tag-filter-wrap::-webkit-scrollbar {
+    #bookmark-tag-filter-wrap::-webkit-scrollbar,
+    #calendar-tag-filter-wrap::-webkit-scrollbar {
         display: none;
     }
     #tag-filter-wrap .tag-chip,
-    #bookmark-tag-filter-wrap .tag-chip {
+    #bookmark-tag-filter-wrap .tag-chip,
+    #calendar-tag-filter-wrap .tag-chip {
         white-space: nowrap;
         flex-shrink: 0;
     }
     #sub-tag-filter-wrap,
-    #bookmark-sub-tag-filter-wrap {
+    #bookmark-sub-tag-filter-wrap,
+    #calendar-sub-tag-filter-wrap {
         overflow-x: auto;
         flex-wrap: nowrap;
         padding-left: 8px;
@@ -1385,16 +1389,19 @@ header h1 {
         scrollbar-width: none;
     }
     #sub-tag-filter-wrap::-webkit-scrollbar,
-    #bookmark-sub-tag-filter-wrap::-webkit-scrollbar {
+    #bookmark-sub-tag-filter-wrap::-webkit-scrollbar,
+    #calendar-sub-tag-filter-wrap::-webkit-scrollbar {
         display: none;
     }
     #sub-tag-filter-wrap .tag-chip,
-    #bookmark-sub-tag-filter-wrap .tag-chip {
+    #bookmark-sub-tag-filter-wrap .tag-chip,
+    #calendar-sub-tag-filter-wrap .tag-chip {
         white-space: nowrap;
         flex-shrink: 0;
     }
     #status-filter-wrap,
-    #bookmark-status-filter-wrap {
+    #bookmark-status-filter-wrap,
+    #calendar-status-filter-wrap {
         flex: 0 0 auto;
     }
     .status-label-full {
@@ -1429,8 +1436,8 @@ header h1 {
     }
 
     .cal-filter-btn {
-        padding: 10px 16px;
-        font-size: 13px;
+        padding: 5px 12px;
+        font-size: 11px;
     }
     .bookmark-btn {
         width: 34px;
