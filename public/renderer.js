@@ -1370,6 +1370,20 @@ function initMapIfNeeded() {
         // 👉 geolocateControl은 기본값(true)로 둠 - 버튼은 그대로 있고, 사용자가
         // 직접 눌렀을 때만 위치 권한을 묻고 이동함 (자동 실행 안 함)
     });
+    // 👉 축소하면 점만, 확대하면 이름표까지 보이게 - 줌 바뀔 때마다 갱신
+    mtMap.on('zoom', updateMarkerLabelVisibility);
+}
+
+const MAP_LABEL_ZOOM_THRESHOLD = 11; // 이 줌 레벨 이상일 때만 이름표(텍스트) 표시
+
+// 지금 줌 레벨에 맞춰 모든 마커의 이름표를 보이거나 숨김
+function updateMarkerLabelVisibility() {
+    if (!mtMap) return;
+    const showLabels = mtMap.getZoom() >= MAP_LABEL_ZOOM_THRESHOLD;
+    mapMarkers.forEach(marker => {
+        const el = marker.getElement();
+        el.classList.toggle('zoomed-in', showLabels);
+    });
 }
 
 function renderMapView() {
@@ -1430,6 +1444,7 @@ function renderMapView() {
             .addTo(mtMap);
         mapMarkers.push(marker);
     });
+    updateMarkerLabelVisibility(); // 새로 그려진 마커들도 지금 줌 레벨에 맞춰 초기 상태 맞춤
 
     const countText = document.getElementById('map-count-text');
     if (countText) {
