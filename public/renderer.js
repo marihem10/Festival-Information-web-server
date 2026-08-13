@@ -1036,7 +1036,7 @@ let currentDate = new Date();
 const CALENDAR_MAX_DURATION_DAYS = 30;
 
 function getEventsForDate(dateObj) {
-    return allFestivalsCache.filter(f => {
+    return getCalendarFilteredList().filter(f => {
         const start = parseIso(f.startDate);
         if (!start) return false;
         const end = parseIso(f.endDate) || start;
@@ -1067,6 +1067,21 @@ function getCalMetrics() {
 }
 
 let calendarBookmarkOnly = false;
+let calendarRegionFilter = null;
+let calendarRegionPanelOpen = false;
+let calendarTagFilter = null;
+let calendarSubTagFilter = null;
+let calendarStatusFilter = null;
+
+// 홈 화면 필터랑 같은 방식으로 캘린더 전용 필터를 적용한 목록을 만듦
+function getCalendarFilteredList() {
+    let list = calendarBookmarkOnly ? allFestivalsCache.filter(f => bookmarkedKeys.has(f.key)) : allFestivalsCache;
+    if (calendarRegionFilter) list = list.filter(f => f.region === calendarRegionFilter);
+    if (calendarStatusFilter) list = list.filter(f => f.status.key === calendarStatusFilter);
+    if (calendarTagFilter) list = list.filter(f => f.category === calendarTagFilter);
+    if (calendarSubTagFilter) list = list.filter(f => f.subCategory === calendarSubTagFilter);
+    return list;
+}
 
 document.getElementById('cal-filter-all').addEventListener('click', () => {
     calendarBookmarkOnly = false;
@@ -1082,6 +1097,30 @@ document.getElementById('cal-filter-bookmark').addEventListener('click', () => {
 });
 
 function renderCalendar() {
+    // 홈 화면이랑 같은 필터 칩 렌더 함수를 재사용함
+    renderRegionToggleButton('calendar-region-filter-wrap', calendarRegionFilter, calendarRegionPanelOpen, () => {
+        calendarRegionPanelOpen = !calendarRegionPanelOpen;
+        renderCalendar();
+    });
+    renderRegionDetailChips('calendar-region-detail-wrap', allFestivalsCache, calendarRegionFilter, calendarRegionPanelOpen, (region) => {
+        calendarRegionFilter = region;
+        calendarRegionPanelOpen = false;
+        renderCalendar();
+    });
+    renderStatusFilterButtons('calendar-status-filter-wrap', calendarStatusFilter, (status) => {
+        calendarStatusFilter = status;
+        renderCalendar();
+    });
+    renderTagFilterChips('calendar-tag-filter-wrap', allFestivalsCache, calendarTagFilter, (cat) => {
+        calendarTagFilter = cat;
+        calendarSubTagFilter = null;
+        renderCalendar();
+    });
+    renderSubTagFilterChips('calendar-sub-tag-filter-wrap', allFestivalsCache, calendarTagFilter, calendarSubTagFilter, (subcat) => {
+        calendarSubTagFilter = subcat;
+        renderCalendar();
+    });
+
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
@@ -1112,6 +1151,14 @@ function renderCalendar() {
     renderEventOverlayBars(year, month, lastDay);
 }
 
+// 👉 캘린더 막대 색을 카테고리(行事/祭り/公演)에 따라 결정 - 새 세부분류 체계 이후에도
+// 대분류 값(category)은 그대로 行事/祭り/公演 중 하나라 이걸 기준으로 씀
+function getCategoryBarClass(category) {
+    if (category === '祭り') return 'cat-festival';
+    if (category === '公演') return 'cat-performance';
+    return 'cat-event'; // 行事, 또는 예상 밖 값의 기본값
+}
+
 function renderEventOverlayBars(year, month, lastDay) {
     const { maxLanes: CAL_MAX_LANES, barHeight: CAL_BAR_HEIGHT, barGap: CAL_BAR_GAP, topOffset: CAL_TOP_OFFSET } = getCalMetrics();
     const calendarBody = document.getElementById('calendar-body');
@@ -1120,9 +1167,7 @@ function renderEventOverlayBars(year, month, lastDay) {
     const monthStart = new Date(year, month, 1);
     const monthEnd = new Date(year, month, lastDay);
 
-    const sourceList = calendarBookmarkOnly
-        ? allFestivalsCache.filter(f => bookmarkedKeys.has(f.key))
-        : allFestivalsCache;
+    const sourceList = getCalendarFilteredList();
 
     const items = sourceList.map(f => {
         const start = parseIso(f.startDate);
@@ -1203,7 +1248,9 @@ function renderEventOverlayBars(year, month, lastDay) {
         const isBookmarked = bookmarkedKeys.has(seg.fest.key);
 
         const bar = document.createElement('div');
-        bar.className = `calendar-event-bar lane-${seg.lane % 3} ${seg.isTrueStart ? 'bar-start' : ''} ${seg.isTrueEnd ? 'bar-end' : ''} ${isBookmarked ? 'bookmarked' : ''}`;
+        // 👉 색을 레인(줄 순서)이 아니라 카테고리(行事/祭り/公演)로 결정 - 색 자체에
+        // 의미가 있게 함(레인은 그냥 겹칠 때 몇 번째 줄에 놓을지 위치만 결정)
+        bar.className = `calendar-event-bar ${getCategoryBarClass(seg.fest.category)} ${seg.isTrueStart ? 'bar-start' : ''} ${seg.isTrueEnd ? 'bar-end' : ''} ${isBookmarked ? 'bookmarked' : ''}`;
         bar.style.position = 'absolute';
         bar.style.left = `${startRect.left - bodyRect.left}px`;
         bar.style.width = `${endRect.right - startRect.left}px`;
