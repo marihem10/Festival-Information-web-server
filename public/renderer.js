@@ -286,7 +286,10 @@ function normalizeSimpleItem(item) {
         lat: item.lat || '',
         lng: item.lng || '',
         category: item.category || '',
-        subCategory: '', // 직접추가 항목은 세부분류 개념이 없음 - 대분류에서만 뜸
+        // 👉 직접추가 항목도 이제 세부분류를 넣을 수 있음 - Firestore에 subCategory
+        // 필드로 20개 세부분류 중 하나(한국어)를 넣으면 hub 항목이랑 똑같은 사전으로
+        // 일본어 번역+정렬됨. 안 넣으면 예전처럼 대분류에서만 보임(비워둬도 안전)
+        subCategory: SUBCATEGORY_JA[item.subCategory] || item.subCategory || '',
         image: item.image || '',
         homepage: extractUrl(item.homepage),
         startDate: item.startDate || '',
