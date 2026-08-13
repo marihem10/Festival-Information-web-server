@@ -1367,6 +1367,8 @@ function initMapIfNeeded() {
         center: [128.7, 35.4], // MapTiler는 [경도, 위도] 순서 (Leaflet이랑 반대라 주의)
         zoom: 7.5, // 부산+경남+울산 전체가 넓게 보이게 (9는 거제 부근만 확대되어 보였음)
         language: maptilersdk.Language.JAPANESE // 도로명/지명도 일본어로 표시
+        // 👉 geolocateControl은 기본값(true)로 둠 - 버튼은 그대로 있고, 사용자가
+        // 직접 눌렀을 때만 위치 권한을 묻고 이동함 (자동 실행 안 함)
     });
 }
 
