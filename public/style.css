@@ -940,10 +940,22 @@ header h1 {
     box-shadow: 0 1px 4px rgba(138, 74, 148, 0.4);
 }
 .calendar-event-bar.bookmarked {
-    background: linear-gradient(135deg, #E3A94A, #C9860B);
     color: #3d2400;
     font-weight: 800;
+}
+/* 👉 북마크끼리도 겹치면 다 똑같은 금색이라 구분이 안 됐음 - 레인별로 금색 톤을
+   다르게 줘서, "북마크다"는 느낌(전부 금색 계열)은 유지하면서 서로도 구분되게 함 */
+.calendar-event-bar.bookmarked.lane-0 {
+    background: linear-gradient(135deg, #E3A94A, #C9860B);
     box-shadow: 0 1px 5px rgba(201, 134, 11, 0.5);
+}
+.calendar-event-bar.bookmarked.lane-1 {
+    background: linear-gradient(135deg, #D99A6C, #A8623D);
+    box-shadow: 0 1px 5px rgba(168, 98, 61, 0.5);
+}
+.calendar-event-bar.bookmarked.lane-2 {
+    background: linear-gradient(135deg, #C4AE55, #8C7A1E);
+    box-shadow: 0 1px 5px rgba(140, 122, 30, 0.5);
 }
 .calendar-event-more {
     font-size: 10px;
