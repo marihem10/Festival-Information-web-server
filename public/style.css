@@ -1018,7 +1018,7 @@ header h1 {
    방식이 다 잘 안 보인다는 피드백이 있어서, 모양 자체가 다른 아이콘으로 확실하게 표시 */
 .calendar-event-bar.bookmarked {
     box-sizing: border-box;
-    border: 2px solid white;
+    border: 2px solid #FFC107;
     font-weight: 800;
 }
 .calendar-event-more {
