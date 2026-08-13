@@ -219,6 +219,45 @@ header h1 {
     font-family: 'Noto Sans JP', sans-serif;
     padding: 12px 14px;
 }
+/* 👉 지도 위 마커에 항상 붙어있는 이름표(제목+상태) - 클릭 안 해도 지도에서 바로 읽힘 */
+.map-marker-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 3px 8px 3px 3px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    white-space: nowrap;
+}
+.map-marker-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1.5px solid white;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.map-marker-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1d1d1f;
+    font-family: 'Noto Sans JP', sans-serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+}
+.map-marker-date {
+    font-size: 9px;
+    font-weight: 700;
+    color: #515154;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 1px 5px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
 
 .calendar-header {
     display: flex;

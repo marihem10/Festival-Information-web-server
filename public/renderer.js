@@ -1409,9 +1409,24 @@ function renderMapView() {
         const hasOngoing = group.fests.some(f => f.status?.key === 'ongoing');
         const pinColor = hasOngoing ? '#ff9500' : '#34c759';
         const popupHtml = group.fests.length === 1 ? buildMapPopupSingle(group.fests[0]) : buildMapPopupGroup(group.fests);
-        const marker = new maptilersdk.Marker({ color: pinColor })
+
+        // 👉 지도 위에 이름표를 항상 띄워둠(클릭 안 해도 보이게) - 고객 요구사항이
+        // "지도 위에 장소/일시/이름을 표기"였는데, 예전엔 핀만 있고 클릭해야만
+        // 보여서 그 요구사항을 제대로 충족 못 하고 있었음
+        const labelTitle = group.fests.length === 1 ? group.fests[0].title : `他${group.fests.length}件`;
+        const dateHint = group.fests.length === 1 ? (group.fests[0].status?.label || '') : '';
+
+        const el = document.createElement('div');
+        el.className = 'map-marker-label-wrap';
+        el.innerHTML = `
+            <span class="map-marker-dot" style="background:${pinColor};"></span>
+            <span class="map-marker-text">${labelTitle}</span>
+            ${dateHint ? `<span class="map-marker-date">${dateHint}</span>` : ''}
+        `;
+
+        const marker = new maptilersdk.Marker({ element: el, anchor: 'left' })
             .setLngLat([group.lng, group.lat])
-            .setPopup(new maptilersdk.Popup({ offset: 25 }).setHTML(popupHtml))
+            .setPopup(new maptilersdk.Popup({ offset: 15 }).setHTML(popupHtml))
             .addTo(mtMap);
         mapMarkers.push(marker);
     });
