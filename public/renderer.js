@@ -330,6 +330,8 @@ const ICON_PIN = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" st
 const ICON_DOT = '<svg viewBox="0 0 8 8" width="8" height="8" fill="currentColor" style="margin-top:6px; flex-shrink:0;"><circle cx="4" cy="4" r="4"/></svg>';
 const ICON_BOOKMARK = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>';
 const ICON_STAR = '<svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px; margin-right:3px;"><path d="M12 2.5l2.95 6.28 6.55.83-4.9 4.7 1.3 6.69L12 17.77l-5.9 3.23 1.3-6.69-4.9-4.7 6.55-.83z" fill="#FFB300" stroke="#8a5700" stroke-width="1"/></svg>';
+// 캘린더 막대 전용 - 테두리 없이 깔끔하게 (작은 크기에서 테두리가 두꺼워 보이는 문제 해결)
+const ICON_STAR_CALENDAR = '<svg viewBox="0 0 24 24" width="10" height="10" style="vertical-align:-1px; margin-right:2px; flex-shrink:0;"><path d="M12 2.5l2.95 6.28 6.55.83-4.9 4.7 1.3 6.69L12 17.77l-5.9 3.23 1.3-6.69-4.9-4.7 6.55-.83z" fill="#FFEB3B"/></svg>';
 
 function looseKey(s) {
     return (s || '').replace(/\s|\(|\)|[0-9]/g, '').toLowerCase();
@@ -1262,7 +1264,7 @@ function renderEventOverlayBars(year, month, lastDay) {
         bar.style.pointerEvents = 'auto';
         bar.style.cursor = 'pointer';
         bar.innerHTML = seg.isTrueStart
-            ? (isBookmarked ? `<span style="display:inline-flex; align-items:center; gap:2px;">${ICON_STAR}${seg.fest.title}</span>` : seg.fest.title)
+            ? (isBookmarked ? `<span style="display:inline-flex; align-items:center; gap:2px;">${ICON_STAR_CALENDAR}${seg.fest.title}</span>` : seg.fest.title)
             : '';
         bar.title = `${isBookmarked ? '★ ' : ''}${seg.fest.title}${seg.fest.startDate ? ` (${seg.fest.startDate.replace(/-/g, '.')}${seg.fest.endDate && seg.fest.endDate !== seg.fest.startDate ? ' ~ ' + seg.fest.endDate.replace(/-/g, '.') : ''})` : ''}`;
         bar.onclick = (e) => {
