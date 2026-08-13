@@ -602,13 +602,14 @@ async function fetchFestivals() {
         const cutoffToday = new Date();
         cutoffToday.setHours(0, 0, 0, 0);
         const withStatus = withStatusRaw.filter(f => {
+            if (f.status.key === 'unknown') return false; // 일정 미정(날짜 없음) 축제는 아예 안 보이게 함
             if (f.status.key !== 'ended') return true;
             const end = parseIso(f.endDate) || parseIso(f.startDate);
             if (!end) return true;
             const daysSinceEnd = (cutoffToday - end) / 86400000;
             return daysSinceEnd <= ENDED_CUTOFF_DAYS;
         });
-        console.log(`[진단-단계] ③상태분류후=${withStatusRaw.length}건 → ④종료60일초과제외후=${withStatus.length}건 (제외된 개수: ${withStatusRaw.length - withStatus.length}건)`);
+        console.log(`[진단-단계] ③상태분류후=${withStatusRaw.length}건 → ④종료60일초과+일정미정 제외후=${withStatus.length}건 (제외된 개수: ${withStatusRaw.length - withStatus.length}건)`);
 
         const counts = withStatus.reduce((acc, f) => {
             acc[f.status.key] = (acc[f.status.key] || 0) + 1;
