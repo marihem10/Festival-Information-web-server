@@ -810,7 +810,7 @@ function renderFestivals(festivals, clearGrid = true, totalCount = 0, gridId = '
                 <h3>${title}</h3>
                 <p style="font-size: 12px; color: #515154; margin:4px 0; display:flex; align-items:center; min-width:0;">${ICON_CALENDAR}<span style="flex:1 1 auto; width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">${dateStr || '日程未定'}</span></p>
                 <p style="font-size: 12px; color: #515154; margin: 4px 0 10px 0; display:flex; align-items:center; min-width:0;" title="${location}">${ICON_PIN}<span style="flex:1 1 auto; width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0;">${location}</span></p>
-                <span class="tag">${fest.category || 'フェスティバル・イベント'}</span>
+                <span class="tag ${getCategoryBarClass(fest.category)}">${fest.category || 'フェスティバル・イベント'}</span>
             </div>
         `;
         grid.insertAdjacentHTML('beforeend', cardHTML);

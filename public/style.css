@@ -183,6 +183,15 @@ header h1 {
     font-weight: 700;
     margin-top: 2px;
 }
+/* 👉 카드에 뜨는 카테고리 태그도 필터 버튼/캘린더 막대바랑 같은 색으로 통일 */
+.tag.cat-festival {
+    background: rgba(232, 83, 110, 0.12);
+    color: #E8536E;
+}
+.tag.cat-performance {
+    background: rgba(18, 165, 121, 0.12);
+    color: #12A579;
+}
 
 /* --- 🗺️ 지도 화면 --- */
 #view-map.view-section {
