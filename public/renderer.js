@@ -1253,7 +1253,7 @@ function renderEventOverlayBars(year, month, lastDay) {
         const bar = document.createElement('div');
         // 👉 색을 레인(줄 순서)이 아니라 카테고리(行事/祭り/公演)로 결정 - 색 자체에
         // 의미가 있게 함(레인은 그냥 겹칠 때 몇 번째 줄에 놓을지 위치만 결정)
-        bar.className = `calendar-event-bar ${getCategoryBarClass(seg.fest.category)} ${seg.isTrueStart ? 'bar-start' : ''} ${seg.isTrueEnd ? 'bar-end' : ''} ${isBookmarked ? 'bookmarked' : ''}`;
+        bar.className = `calendar-event-bar ${getCategoryBarClass(seg.fest.category)} lane-${seg.lane % 3} ${seg.isTrueStart ? 'bar-start' : ''} ${seg.isTrueEnd ? 'bar-end' : ''} ${isBookmarked ? 'bookmarked' : ''}`;
         bar.style.position = 'absolute';
         bar.style.left = `${startRect.left - bodyRect.left}px`;
         bar.style.width = `${endRect.right - startRect.left}px`;
