@@ -1261,7 +1261,9 @@ function renderEventOverlayBars(year, month, lastDay) {
         bar.style.height = `${CAL_BAR_HEIGHT}px`;
         bar.style.pointerEvents = 'auto';
         bar.style.cursor = 'pointer';
-        bar.textContent = seg.isTrueStart ? (isBookmarked ? `★ ${seg.fest.title}` : seg.fest.title) : '';
+        bar.innerHTML = seg.isTrueStart
+            ? (isBookmarked ? `<span style="display:inline-flex; align-items:center; gap:2px;">${ICON_STAR}${seg.fest.title}</span>` : seg.fest.title)
+            : '';
         bar.title = `${isBookmarked ? '★ ' : ''}${seg.fest.title}${seg.fest.startDate ? ` (${seg.fest.startDate.replace(/-/g, '.')}${seg.fest.endDate && seg.fest.endDate !== seg.fest.startDate ? ' ~ ' + seg.fest.endDate.replace(/-/g, '.') : ''})` : ''}`;
         bar.onclick = (e) => {
             e.stopPropagation();
