@@ -1429,13 +1429,19 @@ function renderMapView() {
         // 보여서 그 요구사항을 제대로 충족 못 하고 있었음
         const labelTitle = group.fests.length === 1 ? group.fests[0].title : `他${group.fests.length}件`;
         const dateHint = group.fests.length === 1 ? (group.fests[0].status?.label || '') : '';
+        // 👉 홈 카드에 있는 것과 같은 카테고리 태그를 여기도 추가 (그룹핑된 경우는 카테고리가
+        // 섞여있을 수 있어서 단일 축제일 때만 표시)
+        const catTag = group.fests.length === 1 ? group.fests[0].category : '';
+        const catClass = group.fests.length === 1 ? getCategoryBarClass(group.fests[0].category) : '';
 
         const el = document.createElement('div');
         el.className = 'map-marker-label-wrap';
+        el.style.setProperty('--marker-color', pinColor);
         el.innerHTML = `
-            <span class="map-marker-dot" style="background:${pinColor};"></span>
+            <span class="map-marker-dot"></span>
             <span class="map-marker-text">${labelTitle}</span>
             ${dateHint ? `<span class="map-marker-date">${dateHint}</span>` : ''}
+            ${catTag ? `<span class="map-marker-cat ${catClass}">${catTag}</span>` : ''}
         `;
 
         const marker = new maptilersdk.Marker({ element: el, anchor: 'left' })
