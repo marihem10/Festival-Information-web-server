@@ -1455,9 +1455,7 @@ function renderMapView() {
 
     const countText = document.getElementById('map-count-text');
     if (countText) {
-        countText.textContent = noCoordCount > 0
-            ? `${shownCount}件を表示中（位置情報がない${noCoordCount}件は表示されません）`
-            : `${shownCount}件を表示中`;
+        countText.textContent = `${shownCount}件を表示中`;
     }
 }
 
