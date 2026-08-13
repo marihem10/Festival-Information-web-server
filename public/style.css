@@ -926,36 +926,36 @@ header h1 {
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
 }
-/* 👉 겹치는 축제를 레인(줄)별로 다른 색으로 구분 - 북마크는 항상 금색이 우선(더 아래 규칙이 덮어씀) */
+/* 👉 겹치는 축제를 레인(줄)별로 다른 색으로 구분 - 앱 전체의 밝은 파스텔톤(보라/파랑)이랑
+   어울리게 산뜻하고 채도 높은 색으로 재구성함 (예전엔 남색/보라가 탁하고 칙칙했음) */
 .calendar-event-bar.lane-0 {
-    background: linear-gradient(135deg, #5B7FB5, #34517F);
-    box-shadow: 0 1px 4px rgba(52, 81, 127, 0.4);
+    background: linear-gradient(135deg, #4FACFE, #2E6FE0);
+    box-shadow: 0 1px 4px rgba(46, 111, 224, 0.4);
 }
 .calendar-event-bar.lane-1 {
-    background: linear-gradient(135deg, #6FBF9E, #2F7D63);
-    box-shadow: 0 1px 4px rgba(47, 125, 99, 0.4);
+    background: linear-gradient(135deg, #3DDC97, #12A579);
+    box-shadow: 0 1px 4px rgba(18, 165, 121, 0.4);
 }
 .calendar-event-bar.lane-2 {
-    background: linear-gradient(135deg, #C57FC2, #8A4A94);
-    box-shadow: 0 1px 4px rgba(138, 74, 148, 0.4);
+    background: linear-gradient(135deg, #FF8FA3, #E8536E);
+    box-shadow: 0 1px 4px rgba(232, 83, 110, 0.4);
 }
 .calendar-event-bar.bookmarked {
-    color: #3d2400;
+    color: #4a2e00;
     font-weight: 800;
 }
-/* 👉 북마크끼리도 겹치면 다 똑같은 금색이라 구분이 안 됐음 - 레인별로 금색 톤을
-   다르게 줘서, "북마크다"는 느낌(전부 금색 계열)은 유지하면서 서로도 구분되게 함 */
+/* 북마크끼리 겹쳐도 구분되게 레인별로 톤을 다르게 하되, 전부 "금색 계열"로 통일감 유지 */
 .calendar-event-bar.bookmarked.lane-0 {
-    background: linear-gradient(135deg, #E3A94A, #C9860B);
-    box-shadow: 0 1px 5px rgba(201, 134, 11, 0.5);
+    background: linear-gradient(135deg, #FFC857, #F2A93C);
+    box-shadow: 0 1px 5px rgba(242, 169, 60, 0.5);
 }
 .calendar-event-bar.bookmarked.lane-1 {
-    background: linear-gradient(135deg, #D99A6C, #A8623D);
-    box-shadow: 0 1px 5px rgba(168, 98, 61, 0.5);
+    background: linear-gradient(135deg, #FFB199, #F0805F);
+    box-shadow: 0 1px 5px rgba(240, 128, 95, 0.5);
 }
 .calendar-event-bar.bookmarked.lane-2 {
-    background: linear-gradient(135deg, #C4AE55, #8C7A1E);
-    box-shadow: 0 1px 5px rgba(140, 122, 30, 0.5);
+    background: linear-gradient(135deg, #E8D26B, #D4AE3A);
+    box-shadow: 0 1px 5px rgba(212, 174, 58, 0.5);
 }
 .calendar-event-more {
     font-size: 10px;
