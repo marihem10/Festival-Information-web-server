@@ -711,6 +711,11 @@ header h1 {
 #bookmark-status-filter-wrap {
     margin-left: auto;
 }
+/* 캘린더는 홈/북마크랑 다르게, 필터 줄 전체(지역+카테고리+상태)를 오른쪽으로 몰아둠 -
+   すべて/★ブックマークのみ 토글은 그대로 왼쪽에 남음(.filter-row가 아닌 별도 요소라서) */
+#view-calendar .filter-row {
+    justify-content: flex-end;
+}
 
 /* 👉 세부분류 줄 - 대분류 밑에 살짝 들여쓰고, 칩도 한 단계 작게 만들어서
    "이건 위에서 고른 대분류의 하위 항목"이라는 게 시각적으로 느껴지게 함 */
@@ -765,6 +770,19 @@ header h1 {
     background: var(--primary-blue);
     color: white;
     border-color: var(--primary-blue);
+}
+/* 👉 카테고리 필터 버튼도 캘린더 막대바랑 같은 색으로 통일 (파랑=行事, 코랄=祭り, 민트=公演) */
+.tag-chip.cat-event.active {
+    background: linear-gradient(135deg, #4FACFE, #2E6FE0);
+    border-color: #2E6FE0;
+}
+.tag-chip.cat-festival.active {
+    background: linear-gradient(135deg, #FF8FA3, #E8536E);
+    border-color: #E8536E;
+}
+.tag-chip.cat-performance.active {
+    background: linear-gradient(135deg, #3DDC97, #12A579);
+    border-color: #12A579;
 }
 
 .status-filter-ongoing.active {

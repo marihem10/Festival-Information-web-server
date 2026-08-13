@@ -406,9 +406,10 @@ function renderTagFilterChips(containerId, sourceList, activeFilter, onSelect) {
         return;
     }
     // 開催中/開催予定 버튼과 똑같은 토글 방식 - すべて 칩 없이, 같은 걸 다시 누르면 해제됨
+    // 막대바(캘린더)랑 같은 클래스를 붙여서 색을 맞춤
     container.innerHTML = categories.map(c => {
         const active = activeFilter === c;
-        return `<span class="tag-chip ${active ? 'active' : ''}" data-cat="${c}">${c}</span>`;
+        return `<span class="tag-chip ${getCategoryBarClass(c)} ${active ? 'active' : ''}" data-cat="${c}">${c}</span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
         chip.addEventListener('click', () => {
