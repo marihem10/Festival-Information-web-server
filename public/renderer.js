@@ -437,9 +437,11 @@ function renderSubTagFilterChips(containerId, sourceList, broadFilter, activeSub
         return;
     }
     // "└" 화살표를 붙여서 위 대분류의 하위 항목이라는 걸 시각적으로 더 명확하게 함
+    // 부모 대분류(broadFilter) 색을 그대로 물려받게 함
+    const catClass = getCategoryBarClass(broadFilter);
     container.innerHTML = subCategories.map(c => {
         const active = activeSubFilter === c;
-        return `<span class="tag-chip sub-chip ${active ? 'active' : ''}" data-subcat="${c}">└ ${c}</span>`;
+        return `<span class="tag-chip sub-chip ${catClass} ${active ? 'active' : ''}" data-subcat="${c}">└ ${c}</span>`;
     }).join('');
     container.querySelectorAll('.tag-chip').forEach(chip => {
         chip.addEventListener('click', () => {

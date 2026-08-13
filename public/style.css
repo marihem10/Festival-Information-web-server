@@ -747,6 +747,28 @@ header h1 {
     color: white;
     font-weight: 700;
 }
+/* 👉 세부분류 칩도 부모 대분류(行事/祭り/公演) 색을 물려받게 함 */
+.sub-filter-row .tag-chip.cat-event {
+    color: #2E6FE0;
+    border-color: rgba(46, 111, 224, 0.25);
+}
+.sub-filter-row .tag-chip.cat-event.active {
+    background: linear-gradient(135deg, #4FACFE, #2E6FE0);
+}
+.sub-filter-row .tag-chip.cat-festival {
+    color: #E8536E;
+    border-color: rgba(232, 83, 110, 0.25);
+}
+.sub-filter-row .tag-chip.cat-festival.active {
+    background: linear-gradient(135deg, #FF8FA3, #E8536E);
+}
+.sub-filter-row .tag-chip.cat-performance {
+    color: #12A579;
+    border-color: rgba(18, 165, 121, 0.25);
+}
+.sub-filter-row .tag-chip.cat-performance.active {
+    background: linear-gradient(135deg, #3DDC97, #12A579);
+}
 .filter-row .tag-filter-wrap {
     margin-bottom: 0;
 }
@@ -962,8 +984,8 @@ header h1 {
    이러면 카테고리 색(무슨 종류인지)이랑 북마크 여부(별도 표시)를 동시에 볼 수 있음 */
 .calendar-event-bar.bookmarked {
     box-sizing: border-box;
-    border: 2px solid #FFD54A;
-    box-shadow: 0 0 0 1px rgba(255, 213, 74, 0.55), 0 2px 6px rgba(0, 0, 0, 0.18);
+    border: 3px solid #FFC107;
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25);
     font-weight: 800;
     position: relative;
     overflow: hidden;
@@ -972,10 +994,10 @@ header h1 {
     content: '';
     position: absolute;
     top: 0;
-    left: -30%;
-    width: 35%;
+    left: -25%;
+    width: 45%;
     height: 100%;
-    background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+    background: linear-gradient(115deg, transparent, rgba(255, 255, 255, 0.85), transparent);
     transform: skewX(-20deg);
     pointer-events: none;
 }
@@ -1427,6 +1449,9 @@ header h1 {
         height: 13px;
         line-height: 13px;
         padding: 0 3px;
+    }
+    .calendar-event-bar.bookmarked {
+        border-width: 2px; /* 모바일은 막대가 작아서(13px) 3px면 너무 두꺼워 보임 */
     }
     .calendar-event-more {
         font-size: 8px;
