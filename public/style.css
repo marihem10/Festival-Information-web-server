@@ -850,6 +850,7 @@ header h1 {
 }
 .sub-filter-row .tag-chip.cat-event.active {
     background: linear-gradient(135deg, #4FACFE, #2E6FE0);
+    color: white; /* 선택 안 됐을 때의 색깔 글자 규칙이랑 우선순위가 같아서 안 보이던 버그 수정 */
 }
 .sub-filter-row .tag-chip.cat-festival {
     color: #E8536E;
@@ -857,6 +858,7 @@ header h1 {
 }
 .sub-filter-row .tag-chip.cat-festival.active {
     background: linear-gradient(135deg, #FF8FA3, #E8536E);
+    color: white;
 }
 .sub-filter-row .tag-chip.cat-performance {
     color: #12A579;
@@ -864,6 +866,7 @@ header h1 {
 }
 .sub-filter-row .tag-chip.cat-performance.active {
     background: linear-gradient(135deg, #3DDC97, #12A579);
+    color: white;
 }
 .filter-row .tag-filter-wrap {
     margin-bottom: 0;
