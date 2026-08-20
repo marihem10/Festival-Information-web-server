@@ -276,6 +276,30 @@ async function fetchDetailIntro(contentId) {
   }
 }
 
+// 👉 detailIntro2 응답을 우리 필드명으로 매핑하는 공통 함수 - 재시도 때도 똑같이 써서
+// 코드 중복(그리고 실수로 필드 하나 빠뜨리는 것) 방지
+function mapDetailFields(item, data) {
+  return {
+    ...item,
+    eventStartDate: data?.eventstartdate || item.eventStartDate || '',
+    eventEndDate: data?.eventenddate || item.eventEndDate || '',
+    eventPlace: data?.eventplace || item.eventPlace || '',
+    playTime: data?.playtime || item.playTime || '',
+    program: data?.program || item.program || '',
+    subEvent: data?.subevent || item.subEvent || '',
+    sponsor1: data?.sponsor1 || item.sponsor1 || '',
+    sponsor1Tel: data?.sponsor1tel || item.sponsor1Tel || '',
+    sponsor2: data?.sponsor2 || item.sponsor2 || '',
+    ageLimit: data?.agelimit || item.ageLimit || '',
+    bookingPlace: data?.bookingplace || item.bookingPlace || '',
+    discountInfo: data?.discountinfofestival || item.discountInfo || '',
+    placeInfo: data?.placeinfo || item.placeInfo || '',
+    progressType: data?.progresstype || item.progressType || '',
+    spendTime: data?.spendtime || item.spendTime || '',
+    useFee: data?.usetimefestival || item.useFee || ''
+  };
+}
+
 async function enrichWithDates(items, concurrency = 15) {
   const queue = [...items];
   const results = [];
@@ -285,21 +309,39 @@ async function enrichWithDates(items, concurrency = 15) {
       try {
         // eslint-disable-next-line no-await-in-loop
         const data = await fetchDetailIntro(item.contentId);
-        results.push({
-          ...item,
-          eventStartDate: data?.eventstartdate || '', eventEndDate: data?.eventenddate || '',
-          eventPlace: data?.eventplace || '', playTime: data?.playtime || '', program: data?.program || '',
-          subEvent: data?.subevent || '', sponsor1: data?.sponsor1 || '', sponsor1Tel: data?.sponsor1tel || '',
-          sponsor2: data?.sponsor2 || '', ageLimit: data?.agelimit || '', bookingPlace: data?.bookingplace || '',
-          discountInfo: data?.discountinfofestival || '', placeInfo: data?.placeinfo || '',
-          progressType: data?.progresstype || '', spendTime: data?.spendtime || '', useFee: data?.usetimefestival || ''
-        });
+        results.push(mapDetailFields(item, data));
       } catch (e) {
         results.push(item);
       }
     }
   }
   await Promise.all(Array.from({ length: concurrency }, () => worker()));
+
+  // 👉 날짜를 못 받은 항목만 한 번 더 재시도함 - 네트워크 일시적 실패였던 것들은
+  // 이걸로 건질 수 있음. 재시도는 동시성을 낮춰서(5) 서버/API에 부담을 덜 줌
+  const failedIndexes = results.map((r, i) => (!r.eventStartDate ? i : -1)).filter((i) => i >= 0);
+  if (failedIndexes.length > 0) {
+    console.log(`[server] detailIntro2 날짜 못 받은 ${failedIndexes.length}건 재시도 중...`);
+    const retryQueue = [...failedIndexes];
+    async function retryWorker() {
+      while (retryQueue.length > 0) {
+        const idx = retryQueue.shift();
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const data = await fetchDetailIntro(results[idx].contentId);
+          if (data?.eventstartdate) {
+            results[idx] = mapDetailFields(results[idx], data);
+          }
+        } catch (e) {
+          // 재시도도 실패하면 그냥 원래 값(빈 날짜) 유지
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: 5 }, () => retryWorker()));
+    const recoveredCount = failedIndexes.filter((i) => results[i].eventStartDate).length;
+    console.log(`[server] 재시도로 ${recoveredCount}/${failedIndexes.length}건 추가 확보`);
+  }
+
   const successCount = results.filter((r) => r.eventStartDate).length;
   console.log(`[server] detailIntro2 날짜 확보: ${successCount}/${results.length}건`);
   return results;
