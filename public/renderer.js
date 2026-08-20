@@ -602,14 +602,16 @@ async function fetchFestivals() {
         const cutoffToday = new Date();
         cutoffToday.setHours(0, 0, 0, 0);
         const withStatus = withStatusRaw.filter(f => {
-            if (f.status.key === 'unknown') return false; // 일정 미정(날짜 없음) 축제는 아예 안 보이게 함
+            // 👉 "일정미정 숨기기"를 시도했었는데, hub가 가끔 날짜를 빈 값으로
+            // 불안정하게 응답할 때가 있어서, 실제로 있는 축제가 새로고침마다
+            // 사라졌다 나타났다 하는 부작용이 생겼음 - 다시 보이게 되돌림
             if (f.status.key !== 'ended') return true;
             const end = parseIso(f.endDate) || parseIso(f.startDate);
             if (!end) return true;
             const daysSinceEnd = (cutoffToday - end) / 86400000;
             return daysSinceEnd <= ENDED_CUTOFF_DAYS;
         });
-        console.log(`[진단-단계] ③상태분류후=${withStatusRaw.length}건 → ④종료60일초과+일정미정 제외후=${withStatus.length}건 (제외된 개수: ${withStatusRaw.length - withStatus.length}건)`);
+        console.log(`[진단-단계] ③상태분류후=${withStatusRaw.length}건 → ④종료60일초과제외후=${withStatus.length}건 (제외된 개수: ${withStatusRaw.length - withStatus.length}건)`);
 
         const counts = withStatus.reduce((acc, f) => {
             acc[f.status.key] = (acc[f.status.key] || 0) + 1;
@@ -868,6 +870,15 @@ const homeGridWrapEl = document.getElementById('festival-grid-wrap');
 const bookmarkGridWrapEl = document.getElementById('bookmark-grid-wrap');
 if (homeGridWrapEl) cardHeightObserver.observe(homeGridWrapEl);
 if (bookmarkGridWrapEl) cardHeightObserver.observe(bookmarkGridWrapEl);
+
+// 👉 캘린더도 카드랑 같은 문제가 있었음 - 사이드바 접기/펴기처럼 창 크기(resize 이벤트)는
+// 안 바뀌는데 실제 레이아웃 폭이 바뀌는 경우, 막대 위치 계산이 예전 좌표 그대로 남아
+// 깨져 보이는 버그가 있었음. 카드랑 같은 방식(ResizeObserver)으로 해결함
+const calendarResizeObserver = new ResizeObserver(() => {
+    if (document.getElementById('view-calendar').style.display !== 'none') renderCalendar();
+});
+const calendarBodyWrapEl = document.getElementById('calendar-body');
+if (calendarBodyWrapEl) calendarResizeObserver.observe(calendarBodyWrapEl);
 
 let currentDetailFest = null;
 let detailMiniMap = null;
